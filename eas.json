@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 14.4.0",
+    "version": ">= 15.0.13",
     "appVersionSource": "remote"
   },
   "build": {
@@ -12,14 +12,10 @@
       "distribution": "internal"
     },
     "production": {
-<<<<<<< HEAD
-      "autoIncrement": true
-=======
       "autoIncrement": true,
       "android": {
         "buildType": "apk"
       }
->>>>>>> a3381a7 (fix bug #1)
     }
   },
   "submit": {

@@ -8,7 +8,6 @@ import {
   Dimensions,
   Platform,
   StyleSheet,
-  KeyboardAvoidingView,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { CheckBox } from "react-native-elements";
@@ -55,7 +54,6 @@ import {
   checkPermissionsAccept,
   requestPermissionsAccept,
 } from "../../utils/permissionsDevice";
-import workRepairDetailStyle from "../../styles/WorkRepairDetailStyle";
 
 const InputNormal = ({ hint, onChangeText, val, color, dis, typeOfInput }) => {
   return (
@@ -75,6 +73,7 @@ const InputNormal = ({ hint, onChangeText, val, color, dis, typeOfInput }) => {
 };
 
 export default function WorkCarryRepairScreen(props) {
+  console.log(props.getLeakwounds);
   const dispatch = useDispatch();
 
   const workCarrayRepairReducer = useSelector(
@@ -107,13 +106,6 @@ export default function WorkCarryRepairScreen(props) {
   const [holeWidth, setHoleWidth] = useState("");
   const [arrPipeSize, setArrPipeSize] = useState([]);
   const [arrProcessGIS, setArrProcessGIS] = useState([]);
-
-  const [leakwoundisFocus, setLeakwoundIsFocus] = useState(false);
-  const [empoyeesisFocus, setEmpoyeesIsFocus] = useState(false);
-  const [tpyofpipesisFocus, setTpyofpipesisFocus] = useState(false);
-  const [sizeofpipesisFocus, setSizeofpipesisFocus] = useState(false);
-  const [processGISisFocus, setProcessGISisFocus] = useState(false);
-  const [isFocus, setIsFocus] = useState(false);
 
   // Begin New Picker DateTime
   const [show, setShow] = useState(false);
@@ -267,33 +259,29 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const loadData_savePickerVal = () => {
-    // console.log("TypePipe:", props.data.process.piplineType);
-    // console.log("Picker Value State:", pickerdVal);
-    // console.log("props.data.process****:", props.data.process);
-
     let leakWound_id = "99";
     if (props.data.process.leakWound_id) {
       leakWound_id = props.data.process.leakWound_id.toString();
     }
-    // console.log(leakWound_id)
 
     setPickerdVal((_state) => ({
-      tpyofpipes: props.data.process.piplineType?.toString() ?? "",
-      sizeofpipes: props.data.process.piplineSize?.toString() ?? "",
-      serfaces: props.data.process.surfaceAppearance?.toString() ?? "",
-      empoyees: props.data.process.repaireAccountId?.toString() ?? "",
-      processpipes: props.data.process.isNotGIS?.toString() ?? "",
-      leakwound: leakWound_id == "99"? "": leakWound_id,
+      ..._state,
+      tpyofpipes: props.data.process.piplineType,
+      sizeofpipes: props.data.process.piplineSize,
+      serfaces: props.data.process.surfaceAppearance,
+      empoyees: props.data.process.repaireAccountId,
+      processpipes: props.data.process.isNotGIS,
+      leakwound: leakWound_id,
     }));
-
-    // console.log("loadData_savePickerVal:", props.data.process)
     sizeofpipe(props.data.process.piplineType);
   };
 
   const loadDataPinLocationPip = () => {
     toggleCheckedLat(
-      !workRepairDetailReducer.dataArray.survey.latitude ||
-        !workRepairDetailReducer.dataArray.survey.longtitude
+      workRepairDetailReducer.dataArray.survey.latitude == "" &&
+        workRepairDetailReducer.dataArray.survey.latitude == ""
+        ? true
+        : false
     );
     if (saveLocationPointNormalReducer.dataObj != null) {
       setPickerdVal((_state) => ({
@@ -307,20 +295,6 @@ export default function WorkCarryRepairScreen(props) {
             : "",
       }));
       sizeofpipe(saveLocationPointNormalReducer.dataObj.piplineType);
-    } else {
-      setPickerdVal((_state) => ({
-        ..._state,
-        tpyofpipes: workRepairDetailReducer.dataArray.survey.piplineType,
-        sizeofpipes: workRepairDetailReducer.dataArray.survey.piplineSize,
-        processpipes:
-          workRepairDetailReducer.dataArray.survey.piplineType == ""
-            ? ""
-            : workRepairDetailReducer.dataArray.survey.piplineType != null &&
-              workRepairDetailReducer.dataArray.survey.piplineSize != null
-            ? "0"
-            : "",
-      }));
-      sizeofpipe(workRepairDetailReducer.dataArray.survey.piplineType);
     }
   };
 
@@ -343,15 +317,10 @@ export default function WorkCarryRepairScreen(props) {
       [nme]: label,
     }));
 
-    if (nme === "tpyofpipes") {
+    if (nme == "tpyofpipes") {
       sizeofpipe(label);
-      setPickerdVal((_state) => ({
-        ..._state,
-        tpyofpipes: label.toString(),
-        sizeofpipes: "",
-      }));
+      setPickerdVal((_state) => ({ ..._state, sizeofpipes: "" }));
     }
-
     if (nme == "processpipes") {
       if (label == 0) {
         if (
@@ -365,6 +334,9 @@ export default function WorkCarryRepairScreen(props) {
       } else {
         toggleChecked(true);
       }
+      // setPickerdVal(_state => ({
+      //   ..._state, tpyofpipes: '', sizeofpipes: ''
+      // }));
       setToggleCheckedSizePipe(false);
     }
 
@@ -421,7 +393,6 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const sizeofpipe = async (value) => {
-    // console.log("sizeofpipe", value)
     let arrr1 = [];
     if (value != "") {
       await getSizeOfPipes(value).then((data) => {
@@ -435,9 +406,7 @@ export default function WorkCarryRepairScreen(props) {
         }
       });
     }
-    const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size }));
-    setArrPipeSize(pipeSizeOptions);
-    // console.log(pipeSizeOptions)
+    setArrPipeSize(arrr1);
   };
 
   const pickerProcess = () => {
@@ -1161,15 +1130,12 @@ export default function WorkCarryRepairScreen(props) {
 
   const disSizePipe = () => {
     let _dis = false;
-    if (pickerdVal.processpipes === "1") {
-      return false;
-    }
     if (toggleCheckedSizePipe == true && checked == true) {
       _dis = false;
     } else {
       _dis = true;
     }
-    // console.log("disSizePipe", _dis)
+
     return _dis;
   };
 
@@ -1183,677 +1149,698 @@ export default function WorkCarryRepairScreen(props) {
     } else {
       _dis = false;
     }
+
     return _dis;
   };
 
+  const [value, setValue] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
+
+  const optionData = [
+    { label: "Item 1", value: "1" },
+    { label: "Item 2", value: "2" },
+    { label: "Item 3", value: "3" },
+    { label: "Item 4", value: "4" },
+    { label: "Item 5", value: "5" },
+    { label: "Item 6", value: "6" },
+    { label: "Item 7", value: "7" },
+    { label: "Item 8", value: "8" },
+  ];
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        style={{ backgroundColor: "#FFFFFF" }}
-        nestedScrollEnabled={true}
-      >
-        <View style={workRepairDetailStyle.section}>
-          <NativeBaseProvider>
-            <View
-              style={{
-                paddingHorizontal: 5,
-                paddingVertical: 10,
-                marginBottom: 5,
-                borderLeftWidth: 5,
-                borderColor: "#194f90",
-                backgroundColor: "#f0f0f0",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text style={textsty.text_normal_bold_color_blue}>
-                ระยะเวลาดำเนินการ
-              </Text>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: "column",
-                marginVertical: 10,
-              }}
-            >
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                <View
-                  style={{
-                    flex: 1,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      marginHorizontal: 10,
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <Text style={textsty.text_normal_bold}>จาก</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={textsty.text_normal_bold}>เวลา</Text>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <TouchableOpacity
-                        onPress={() => setVisibleDateFrom(true)}
-                      >
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.dateForm}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="calendar-month"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleDateFrom && (
-                        <DatePicker_recive
-                          con={onConfirmDate_Form}
-                          dis={onDismissDate_From}
-                          vis={visibleDateFrom}
-                        />
-                      )}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setVisibleTimeFrom(true);
-                        }}
-                      >
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.timeFrom}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="clock-time-three"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleTimeFrom && (
-                        <TimePicker_recive
-                          con={onConfirmTime_From}
-                          dis={onDismissTime_From}
-                          vis={visibleTimeFrom}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </View>
-              </View>
+    <ScrollView style={{ backgroundColor: "#FFFFFF" }}>
+      <View style={{ flex: 1 }}>
+        <NativeBaseProvider>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "column",
+              marginVertical: 10,
+            }}
+          >
+            <View style={{ flex: 1, flexDirection: "row" }}>
               <View
-                style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}
+                style={{
+                  flex: 1,
+                }}
               >
                 <View
                   style={{
-                    flex: 1,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      marginHorizontal: 10,
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <Text style={textsty.text_normal_bold}>ถึง</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={textsty.text_normal_bold}>เวลา</Text>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <TouchableOpacity onPress={() => setVisibleDateTo(true)}>
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.dateTo}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="calendar-month"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleDateTo && (
-                        <DatePicker_recive
-                          con={onConfirmDate_To}
-                          dis={onDismissDate_To}
-                          vis={visibleDateTo}
-                        />
-                      )}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setVisibleTimeTo(true);
-                        }}
-                      >
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.timeTo}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="clock-time-three"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleTimeTo && (
-                        <TimePicker_recive
-                          con={onConfirmTime_To}
-                          dis={onDismissTime_To}
-                          vis={visibleTimeTo}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      marginHorizontal: 10,
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <Text style={textsty.text_normal_bold}>ซ่อมพื้นผิว</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={textsty.text_normal_bold}>เวลา</Text>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                    <View style={{ flex: 1, marginRight: 5 }}>
-                      <TouchableOpacity
-                        onPress={() => setVisibleDateTextTure(true)}
-                      >
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.dateTextTure}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="calendar-month"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleDateTextTure && (
-                        <DatePicker_recive
-                          con={onConfirmDate_TextTure}
-                          dis={onDismissDate_TextTure}
-                          vis={visibleDateTextTure}
-                        />
-                      )}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setVisibleTimeTextTure(true);
-                        }}
-                      >
-                        <InputNormal
-                          hint="วันที่"
-                          val={dateTime.timeTextTrue}
-                          color="#2c689e"
-                          dis={false}
-                        />
-                        <View style={WorkCarryRepairStyle.iconDate}>
-                          <MaterialCommunityIcons
-                            name="clock-time-three"
-                            size={30}
-                            color="#2c689e"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                      {visibleTimeTextTure && (
-                        <TimePicker_recive
-                          con={onConfirmTime_TextTure}
-                          dis={onDismissTime_TextTure}
-                          vis={visibleTimeTextTure}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <View style={{ height: 30 }} />
-              <View style={othersty.liner} />
-            </View>
-            <View style={{ flex: 1, flexDirection: "column", marginTop: 10 }}>
-              <View style={{ flex: 1 }}>
-                <View
-                  style={{
-                    paddingHorizontal: 5,
-                    paddingVertical: 10,
-                    marginBottom: 5,
-                    borderLeftWidth: 5,
-                    borderColor: "#194f90",
-                    backgroundColor: "#f0f0f0",
                     flexDirection: "row",
-                    alignItems: "center",
+                    marginHorizontal: 10,
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Text style={textsty.text_normal_bold_color_blue}>
-                    รายละเอียดการดำเนินการซ่อม
-                  </Text>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <Text style={textsty.text_normal_bold}>จาก</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={textsty.text_normal_bold}>เวลา</Text>
+                  </View>
                 </View>
+                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <TouchableOpacity onPress={() => setVisibleDateFrom(true)}>
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.dateForm}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="calendar-month"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleDateFrom && (
+                      <DatePicker_recive
+                        con={onConfirmDate_Form}
+                        dis={onDismissDate_From}
+                        vis={visibleDateFrom}
+                      />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setVisibleTimeFrom(true);
+                      }}
+                    >
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.timeFrom}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="clock-time-three"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleTimeFrom && (
+                      <TimePicker_recive
+                        con={onConfirmTime_From}
+                        dis={onDismissTime_From}
+                        vis={visibleTimeFrom}
+                      />
+                    )}
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <View
                   style={{
-                    flex: 1,
-                    paddingHorizontal: 10,
+                    flexDirection: "row",
+                    marginHorizontal: 10,
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Text style={textsty.text_normal_bold}>ผู้ซ่อม</Text>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      empoyeesisFocus && { borderColor: "#2c689e" },
-                      pickerdVal.empoyees,
-                    ]}
-                    placeholderStyle={textsty.text_normal_regular}
-                    selectedTextStyle={textsty.text_normal_regular}
-                    inputSearchStyle={textsty.text_normal_regular}
-                    iconStyle={styles.iconStyle}
-                    data={props.empoyees}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!empoyeesisFocus ? "เลือกผู้ซ่อม" : "..."}
-                    searchPlaceholder="ค้นหา..."
-                    value={pickerdVal.empoyees}
-                    onFocus={() => setEmpoyeesIsFocus(true)}
-                    onBlur={() => setEmpoyeesIsFocus(false)}
-                    onChange={(item) => {
-                      // setValue(item.value);
-                      setPickerData("empoyees", item.value);
-                      setEmpoyeesIsFocus(false);
-                    }}
-                    renderLeftIcon={() =>
-                      pickerdVal.empoyees && (
-                        <AntDesign
-                          style={styles.icon}
-                          color="green"
-                          name="checkcircle"
-                          size={15}
-                        />
-                      )
-                    }
-                  />
-                  <Text style={textsty.text_normal_bold}>
-                    ลักษณะการแตก (รูปแบบแผล)
-                    <Text style={[textsty.text_request]}>*</Text>
-                  </Text>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      leakwoundisFocus && { borderColor: "#2c689e" },
-                      pickerdVal.leakwound,
-                    ]}
-                    placeholderStyle={textsty.text_normal_regular}
-                    selectedTextStyle={textsty.text_normal_regular}
-                    inputSearchStyle={textsty.text_normal_regular}
-                    iconStyle={styles.iconStyle}
-                    data={props.getLeakwounds}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={
-                      !leakwoundisFocus ? "เลือกลักษณะการแตก" : "..."
-                    }
-                    searchPlaceholder="ค้นหา..."
-                    value={pickerdVal.leakwound}
-                    onFocus={() => setLeakwoundIsFocus(true)}
-                    onBlur={() => setLeakwoundIsFocus(false)}
-                    onChange={(item) => {
-                      // setValue(item.value);
-                      setPickerData("leakwound", item.value);
-                      setLeakwoundIsFocus(false);
-                    }}
-                    renderLeftIcon={() =>
-                      pickerdVal.leakwound && (
-                        <AntDesign
-                          style={styles.icon}
-                          color="green"
-                          name="checkcircle"
-                          size={15}
-                        />
-                      )
-                    }
-                  />
-                  <View style={WorkCarryRepairStyle.space} />
-                  <HStack alignItems="center">
-                    <Text style={textsty.text_normal_bold}>ชนิดของท่อ</Text>
-                    <Text style={[textsty.text_request]}>*</Text>
-                  </HStack>
-                  <Dropdown
-                    disable={!checked}
-                    style={[
-                      styles.dropdown,
-                      tpyofpipesisFocus && { borderColor: "#2c689e" },
-                      !checked && styles.disabledDropdown,
-                    ]}
-                    placeholderStyle={textsty.text_normal_regular}
-                    selectedTextStyle={textsty.text_normal_regular}
-                    inputSearchStyle={textsty.text_normal_regular}
-                    iconStyle={styles.iconStyle}
-                    data={props.getTypeOfPipes}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!tpyofpipesisFocus ? "เลือกชนิด" : "..."}
-                    searchPlaceholder="ค้นหา..."
-                    value={pickerdVal.tpyofpipes}
-                    onFocus={() => setTpyofpipesisFocus(true)}
-                    onBlur={() => setTpyofpipesisFocus(false)}
-                    onChange={(item) => {
-                      // setValue(item.value);
-                      setPickerData("tpyofpipes", item.value);
-                      setTpyofpipesisFocus(false);
-                    }}
-                    renderLeftIcon={() =>
-                      pickerdVal.tpyofpipes && (
-                        <AntDesign
-                          style={styles.icon}
-                          color="green"
-                          name="checkcircle"
-                          size={15}
-                        />
-                      )
-                    }
-                  />
-                  <HStack alignItems="center">
-                    <Text style={textsty.text_normal_bold}>ขนาดของท่อ</Text>
-                    <Text style={[textsty.text_request]}>*</Text>
-                  </HStack>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      sizeofpipesisFocus && { borderColor: "#2c689e" },
-                      disSizePipe() && styles.disabledDropdown,
-                    ]}
-                    placeholderStyle={textsty.text_normal_regular}
-                    selectedTextStyle={textsty.text_normal_regular}
-                    inputSearchStyle={textsty.text_normal_regular}
-                    iconStyle={styles.iconStyle}
-                    data={arrPipeSize}
-                    search
-                    // maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!sizeofpipesisFocus ? "เลือกขนาด" : "..."}
-                    searchPlaceholder="ค้นหา..."
-                    value={pickerdVal.sizeofpipes}
-                    disable={disSizePipe()}
-                    onFocus={() => setSizeofpipesisFocus(true)}
-                    onBlur={() => setSizeofpipesisFocus(false)}
-                    onChange={(item) => {
-                      // setValue(item.value);
-                      setPickerData("sizeofpipes", item.value);
-                      setSizeofpipesisFocus(false);
-                    }}
-                    renderLeftIcon={() =>
-                      pickerdVal.sizeofpipes && (
-                        <AntDesign
-                          style={styles.icon}
-                          color="green"
-                          name="checkcircle"
-                          size={15}
-                        />
-                      )
-                    }
-                  />
-                  <View style={WorkCarryRepairStyle.space} />
-                  <View style={{ flexDirection: "row" }}>
-                    <View style={{ flex: 2, marginRight: 5 }}>
-                      <HStack alignItems="center">
-                        <Text style={textsty.text_normal_bold}>
-                          สถานะลงจุดซ่อม (GIS)
-                        </Text>
-                        <Text style={[textsty.text_request]}>*</Text>
-                        {checkedLat ? (
-                          <Text style={textsty.text_normal_bold}>
-                            กรุณาลงจุดซ่อม
-                          </Text>
-                        ) : null}
-                      </HStack>
-                    </View>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <Text style={textsty.text_normal_bold}>ถึง</Text>
                   </View>
-                  <View style={{ flexDirection: "column" }}>
-                    <Dropdown
-                      disable={checkedLat}
-                      style={[
-                        styles.dropdown,
-                        processGISisFocus && { borderColor: "#2c689e" },
-                        checkedLat && styles.disabledDropdown,
-                      ]}
-                      placeholderStyle={textsty.text_normal_regular}
-                      selectedTextStyle={textsty.text_normal_regular}
-                      inputSearchStyle={textsty.text_normal_regular}
-                      iconStyle={styles.iconStyle}
-                      data={arrProcessGIS}
-                      search
-                      maxHeight={300}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"เลือกสถานะลงจุดซ่อม (GIS)"}
-                      searchPlaceholder="ค้นหา..."
-                      value={pickerdVal.processpipes}
-                      disabled={disProcesspipes()}
-                      onFocus={() => setProcessGISisFocus(true)}
-                      onBlur={() => setProcessGISisFocus(false)}
-                      onChange={(item) => {
-                        // setValue(item.value);
-                        setPickerData("processpipes", item.value);
-                        setProcessGISisFocus(false);
+                  <View style={{ flex: 1 }}>
+                    <Text style={textsty.text_normal_bold}>เวลา</Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <TouchableOpacity onPress={() => setVisibleDateTo(true)}>
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.dateTo}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="calendar-month"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleDateTo && (
+                      <DatePicker_recive
+                        con={onConfirmDate_To}
+                        dis={onDismissDate_To}
+                        vis={visibleDateTo}
+                      />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setVisibleTimeTo(true);
                       }}
-                      renderLeftIcon={() =>
-                        pickerdVal.processpipes && (
-                          <AntDesign
-                            style={styles.icon}
-                            color="green"
-                            name="checkcircle"
-                            size={15}
+                    >
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.timeTo}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="clock-time-three"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleTimeTo && (
+                      <TimePicker_recive
+                        con={onConfirmTime_To}
+                        dis={onDismissTime_To}
+                        vis={visibleTimeTo}
+                      />
+                    )}
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={{ flex: 1, flexDirection: "row" }}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginHorizontal: 10,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <Text style={textsty.text_normal_bold}>ซ่อมพื้นผิว</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={textsty.text_normal_bold}>เวลา</Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <TouchableOpacity
+                      onPress={() => setVisibleDateTextTure(true)}
+                    >
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.dateTextTure}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="calendar-month"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleDateTextTure && (
+                      <DatePicker_recive
+                        con={onConfirmDate_TextTure}
+                        dis={onDismissDate_TextTure}
+                        vis={visibleDateTextTure}
+                      />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setVisibleTimeTextTure(true);
+                      }}
+                    >
+                      <InputNormal
+                        hint="วันที่"
+                        val={dateTime.timeTextTrue}
+                        color="#283593"
+                        dis={false}
+                      />
+                      <View style={WorkCarryRepairStyle.iconDate}>
+                        <MaterialCommunityIcons
+                          name="clock-time-three"
+                          size={30}
+                          color="#283593"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    {visibleTimeTextTure && (
+                      <TimePicker_recive
+                        con={onConfirmTime_TextTure}
+                        dis={onDismissTime_TextTure}
+                        vis={visibleTimeTextTure}
+                      />
+                    )}
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={{ height: 30 }} />
+            <View style={othersty.liner} />
+          </View>
+          <View style={{ flex: 1, flexDirection: "column", marginTop: 10 }}>
+            <View style={{ flex: 1 }}>
+              <View
+                style={{
+                  flex: 1,
+                  paddingHorizontal: 10,
+                }}
+              >
+                <Text style={textsty.text_normal_bold}>ผู้ซ่อม</Text>
+                <Dropdown
+                  style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  data={props.empoyees}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "เลือกผู้ซ่อม" : "..."}
+                  searchPlaceholder="ค้นหา..."
+                  value={pickerdVal.empoyees}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={(item) => {
+                    // setValue(item.value);
+                    setPickerData("empoyees", item.value);
+                    setIsFocus(false);
+                  }}
+                  renderLeftIcon={() => (
+                    <AntDesign
+                      style={styles.icon}
+                      color={isFocus ? "blue" : "black"}
+                      name="Safety"
+                      size={20}
+                    />
+                  )}
+                />
+                <Text style={textsty.text_normal_bold}>ลักษณะการแตก (รูปแบบแผล)</Text>
+                <Dropdown
+                  style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  data={props.getLeakwounds}
+                  search
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={!isFocus ? "เลือกลักษณะการแตก" : "..."}
+                  searchPlaceholder="ค้นหา..."
+                  value={pickerdVal.leakwound}
+                  onFocus={() => setIsFocus(true)}
+                  onBlur={() => setIsFocus(false)}
+                  onChange={(item) => {
+                    // setValue(item.value);
+                    setPickerData("leakwound", item.value);
+                    setIsFocus(false);
+                  }}
+                  renderLeftIcon={() => (
+                    <AntDesign
+                      style={styles.icon}
+                      color={isFocus ? "blue" : "black"}
+                      name="Safety"
+                      size={20}
+                    />
+                  )}
+                />
+                {/* <HStack alignItems="center" mt={1}>
+                  <Text style={[textsty.text_normal_bold]}>
+                    ลักษณะการแตก (รูปแบบแผล)
+                  </Text>
+                  <Text style={[textsty.text_request]}>*</Text>
+                </HStack> */}
+                <VStack alignItems="center" space={4}>
+                  <Select
+                    key={"select2"}
+                    // selectedValue={pickerdVal.leakwound}
+                    selectedValue={(() => {
+                      const selectedItem = props.getLeakwounds.find(
+                        (item) => item.value === pickerdVal.leakwound
+                      );
+                      const label = selectedItem ? selectedItem.label : "";
+                      return label.length > 10
+                        ? label.substring(0, 10) + "..."
+                        : label;
+                    })()}
+                    width="100%"
+                    // boxSize={0.035 * viewportHeight}
+                    _ios={{ boxSize: 0.04 * viewportHeight }}
+                    _android={{ boxSize: 0.04 * viewportHeight }}
+                    paddingTop={0}
+                    paddingBottom={0}
+                    paddingLeft={2}
+                    borderColor="black"
+                    fontSize={0.02 * viewportHeight}
+                    fontFamily="Prompt-Regular"
+                    accessibilityLabel="เลือกลักษณะการแตก"
+                    placeholder="เลือกลักษณะการแตก"
+                    onValueChange={(itemValue) =>
+                      setPickerData("leakwound", itemValue)
+                    }
+                    _selectedItem={{
+                      bg: "#2c689e",
+                      endIcon: <CheckIcon size={4} />,
+                    }}
+                  >
+                    {props.getLeakwounds.map((val, index) => (
+                      <Select.Item
+                        key={index}
+                        label={val.label}
+                        value={val.value}
+                      />
+                    ))}
+                  </Select>
+                </VStack>
+
+                <View style={WorkCarryRepairStyle.space} />
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <HStack alignItems="center">
+                      <Text style={textsty.text_normal_bold}>ชนิดของท่อ</Text>
+                      <Text style={[textsty.text_request]}>*</Text>
+                    </HStack>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <HStack alignItems="center">
+                      <Text style={textsty.text_normal_bold}>ขนาดของท่อ</Text>
+                      <Text style={[textsty.text_request]}>*</Text>
+                    </HStack>
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <VStack alignItems="center" space={4}>
+                      <Select
+                        key={"select3"}
+                        selectedValue={pickerdVal.tpyofpipes}
+                        width="100%"
+                        _ios={{ boxSize: 0.04 * viewportHeight }}
+                        _android={{ boxSize: 0.04 * viewportHeight }}
+                        paddingTop={0}
+                        paddingBottom={0}
+                        paddingLeft={2}
+                        borderColor="black"
+                        fontSize={0.02 * viewportHeight}
+                        fontFamily="Prompt-Regular"
+                        accessibilityLabel="เลือกชนิดของท่อ"
+                        placeholder="เลือกชนิดของท่อ"
+                        selectedVal={handleTypePipe()}
+                        isDisabled={!checked}
+                        onValueChange={(itemValue) =>
+                          setPickerData("tpyofpipes", itemValue)
+                        }
+                        _selectedItem={{
+                          bg: "#2c689e",
+                          endIcon: <CheckIcon size={4} />,
+                        }}
+                      >
+                        {props.getTypeOfPipes.map((val, index) => (
+                          <Select.Item
+                            key={index}
+                            label={val.label}
+                            value={val.value}
                           />
-                        )
+                        ))}
+                      </Select>
+                    </VStack>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <VStack alignItems="center" space={4}>
+                      <Select
+                        key={"select4"}
+                        selectedValue={pickerdVal.sizeofpipes}
+                        width="100%"
+                        _ios={{ boxSize: 0.04 * viewportHeight }}
+                        _android={{ boxSize: 0.04 * viewportHeight }}
+                        paddingTop={0}
+                        paddingBottom={0}
+                        paddingLeft={2}
+                        borderColor="black"
+                        fontSize={0.02 * viewportHeight}
+                        fontFamily="Prompt-Regular"
+                        accessibilityLabel="เลือกขนาด"
+                        placeholder="เลือกขนาด"
+                        selectedVal={handleSizePipe()}
+                        isDisabled={disSizePipe()}
+                        onValueChange={(itemValue) =>
+                          setPickerData("sizeofpipes", itemValue)
+                        }
+                        _selectedItem={{
+                          bg: "#2c689e",
+                          endIcon: <CheckIcon size={4} />,
+                        }}
+                      >
+                        {arrPipeSize.map((val, index) => (
+                          <Select.Item key={index} label={val} value={val} />
+                        ))}
+                      </Select>
+                    </VStack>
+                  </View>
+                </View>
+                <View style={WorkCarryRepairStyle.space} />
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ flex: 2, marginRight: 5 }}>
+                    <HStack alignItems="center">
+                      <Text style={textsty.text_normal_bold}>
+                        สถานะลงจุดซ่อม (GIS)
+                      </Text>
+                      <Text style={[textsty.text_request]}>*</Text>
+                      {checkedLat ? (
+                        <Text style={textsty.text_normal_bold}>
+                          กรุณาลงจุดซ่อม
+                        </Text>
+                      ) : null}
+                    </HStack>
+                  </View>
+                </View>
+                <View style={{ flexDirection: "column" }}>
+                  <VStack alignItems="center" space={4}>
+                    <Select
+                      key={"select5"}
+                      selectedValue={pickerdVal.processpipes}
+                      width="100%"
+                      _ios={{ boxSize: 0.04 * viewportHeight }}
+                      _android={{ boxSize: 0.04 * viewportHeight }}
+                      paddingTop={0}
+                      paddingBottom={0}
+                      paddingLeft={2}
+                      borderColor="black"
+                      fontSize={0.02 * viewportHeight}
+                      fontFamily="Prompt-Regular"
+                      accessibilityLabel="เลือกสถานะลงจุดซ่อม(GIS)"
+                      placeholder="เลือกสถานะลงจุดซ่อม(GIS)"
+                      selectedVal={handleProcessPipes()}
+                      isDisabled={disProcesspipes()}
+                      onValueChange={(itemValue) =>
+                        setPickerData("processpipes", itemValue)
                       }
+                      _selectedItem={{
+                        bg: "#2c689e",
+                        endIcon: <CheckIcon size={4} />,
+                      }}
+                    >
+                      {arrProcessGIS.map((val, index) => (
+                        <Select.Item
+                          key={index}
+                          label={val.label}
+                          value={val.value}
+                        />
+                      ))}
+                    </Select>
+                  </VStack>
+                  {/* <View style={{ alignItems: 'center' }}>
+                      <CheckBox
+                        containerStyle={{
+                          borderColor: 'transparent',
+                          backgroundColor: 'transparent',
+                          paddingRight: 0,
+                        }}
+                        checked={checked}
+                        onPress={() => {
+                          toggleChecked(!checked);
+                          setToggleCheckedSizePipe(false);
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <Text style={textsty.text_normal_bold}>
+                        GIS ไม่ตรงกับหน้างาน
+                      </Text>
+                    </View> */}
+                </View>
+                <View style={WorkCarryRepairStyle.space} />
+                <Text style={textsty.text_normal_bold}>ลักษณะพื้นผิว</Text>
+                <VStack alignItems="center" space={4}>
+                  <Select
+                    key={"select6"}
+                    selectedValue={pickerdVal.serfaces}
+                    width="100%"
+                    _ios={{ boxSize: 0.04 * viewportHeight }}
+                    _android={{ boxSize: 0.04 * viewportHeight }}
+                    paddingTop={0}
+                    paddingBottom={0}
+                    paddingLeft={2}
+                    borderColor="black"
+                    fontSize={0.02 * viewportHeight}
+                    fontFamily="Prompt-Regular"
+                    accessibilityLabel="ลักษณะพื้นผิว"
+                    placeholder="ลักษณะพื้นผิว"
+                    selectedVal={handleSurfaceAppearance()}
+                    onValueChange={(itemValue) =>
+                      setPickerData("serfaces", itemValue)
+                    }
+                    _selectedItem={{
+                      bg: "#2c689e",
+                      endIcon: <CheckIcon size={4} />,
+                    }}
+                  >
+                    {props.getSerfaces.map((val, index) => (
+                      <Select.Item
+                        key={index}
+                        label={val.label}
+                        value={val.value}
+                      />
+                    ))}
+                  </Select>
+                </VStack>
+                <View style={WorkCarryRepairStyle.space} />
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ flex: 2, marginRight: 5 }}>
+                    <Text style={textsty.text_normal_bold}>
+                      ขนาดหลุม (เมตร)
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <View style={{ flex: 2, marginRight: 5 }}>
+                    <InputNormal
+                      typeOfInput="decimal"
+                      hint="กว้าง"
+                      onChangeText={(text) => setHoleWidth(text)}
+                      val={holeWidth}
+                      color="#2c689e"
                     />
                   </View>
-                  <View style={WorkCarryRepairStyle.space} />
-                  <Text style={textsty.text_normal_bold}>ลักษณะพื้นผิว</Text>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      isFocus && { borderColor: "blue" },
-                      pickerdVal.serfaces,
-                    ]}
-                    placeholderStyle={textsty.text_normal_regular}
-                    selectedTextStyle={textsty.text_normal_regular}
-                    inputSearchStyle={textsty.text_normal_regular}
-                    iconStyle={styles.iconStyle}
-                    data={props.getSerfaces}
-                    search
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!isFocus ? "ลักษณะพื้นผิว" : "..."}
-                    searchPlaceholder="ค้นหา..."
-                    value={pickerdVal.serfaces}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={(item) => {
-                      // setValue(item.value);
-                      setPickerData("serfaces", item.value);
-                      setIsFocus(false);
-                    }}
-                    renderLeftIcon={() =>
-                      pickerdVal.serfaces && (
-                        <AntDesign
-                          style={styles.icon}
-                          color="green"
-                          name="checkcircle"
-                          size={15}
-                        />
-                      )
-                    }
-                  />
-                  <View style={WorkCarryRepairStyle.space} />
-                  <View style={{ flexDirection: "row" }}>
-                    <View style={{ flex: 2, marginRight: 5 }}>
-                      <Text style={textsty.text_normal_bold}>
-                        ขนาดหลุม (เมตร)
-                      </Text>
-                    </View>
+                  <View style={{ flex: 2, marginRight: 5 }}>
+                    <InputNormal
+                      typeOfInput="decimal"
+                      hint="ยาว"
+                      onChangeText={(text) => setHoleLength(text)}
+                      val={holeLength}
+                      color="#2c689e"
+                    />
                   </View>
-                  <View style={{ flexDirection: "row" }}>
-                    <View style={{ flex: 2, marginRight: 5 }}>
-                      <InputNormal
-                        typeOfInput="decimal"
-                        hint="กว้าง"
-                        onChangeText={(text) => setHoleWidth(text)}
-                        val={holeWidth}
-                        color="#2c689e"
-                      />
-                    </View>
-                    <View style={{ flex: 2, marginRight: 5 }}>
-                      <InputNormal
-                        typeOfInput="decimal"
-                        hint="ยาว"
-                        onChangeText={(text) => setHoleLength(text)}
-                        val={holeLength}
-                        color="#2c689e"
-                      />
-                    </View>
-                    <View style={{ flex: 2, marginRight: 5 }}>
-                      <InputNormal
-                        typeOfInput="decimal"
-                        hint="ลึก"
-                        onChangeText={(text) => setHoleDepth(text)}
-                        val={holeDepth}
-                        color="#2c689e"
-                      />
-                    </View>
+                  <View style={{ flex: 2, marginRight: 5 }}>
+                    <InputNormal
+                      typeOfInput="decimal"
+                      hint="ลึก"
+                      onChangeText={(text) => setHoleDepth(text)}
+                      val={holeDepth}
+                      color="#2c689e"
+                    />
                   </View>
                 </View>
               </View>
             </View>
-            <View style={{ height: 10 }} />
-            <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  backgroundColor: "#f57c00",
-                  height: 35,
-                  borderRadius: 10,
-                  borderColor: "#f57c00",
-                  marginTop: 20,
-                  borderWidth: 1,
-                  marginRight: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  settingAlert("ALERT_CLOSE_WORK_REPAIR");
-                }}
-              >
-                <Text style={[textsty.text_normal_bold, { color: "white" }]}>
-                  ปิดงานซ่อม
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  backgroundColor: "#2c689e",
-                  height: 35,
-                  borderRadius: 10,
-                  borderColor: "#2c689e",
-                  marginTop: 20,
-                  borderWidth: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  settingAlert("ALERT_CONFIRM_SAVE_RESULT");
-                }}
-              >
-                <Text style={[textsty.text_normal_bold, { color: "white" }]}>
-                  บันทึกผล
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ height: 100 }} />
-          </NativeBaseProvider>
-          <LoadingSpinner
-            visible={visibleLoading}
-            textContent="กำลังโหลด"
-            animation={"fade"}
-            color={"#0000ff"}
-          />
-          <LoadingSpinner
-            visible={isLoaddingSave}
-            textContent="กำลังบันทึก"
-            animation={"fade"}
-            color={"#0000ff"}
-          />
-          <Awesome
-            visible={visibleAlert}
-            titleIcon={customAlert.titleIcon}
-            showConfirmButton={customAlert.showConfirmButton}
-            showCancelButton={customAlert.showCancelButton}
-            textBody={customAlert.textBody}
-            confirmText={customAlert.confirmText}
-            cancelText={customAlert.cancelText}
-            onConfirmPress={customAlert.onConfirmPress}
-            onCancelPress={customAlert.onCancelPress}
-          />
-          {show && <DateTimePickker />}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+          <View style={{ height: 10 }} />
+          <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: "#f57c00",
+                height: 35,
+                borderRadius: 10,
+                borderColor: "#f57c00",
+                marginTop: 20,
+                borderWidth: 1,
+                marginRight: 10,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => {
+                settingAlert("ALERT_CLOSE_WORK_REPAIR");
+              }}
+            >
+              <Text style={[textsty.text_normal_bold, { color: "white" }]}>
+                ปิดงานซ่อม
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: "#2c689e",
+                height: 35,
+                borderRadius: 10,
+                borderColor: "#2c689e",
+                marginTop: 20,
+                borderWidth: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => {
+                settingAlert("ALERT_CONFIRM_SAVE_RESULT");
+              }}
+            >
+              <Text style={[textsty.text_normal_bold, { color: "white" }]}>
+                บันทึกผล
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </NativeBaseProvider>
+        <LoadingSpinner
+          visible={visibleLoading}
+          textContent="กำลังโหลด"
+          animation={"fade"}
+          color={"#0000ff"}
+        />
+        <LoadingSpinner
+          visible={isLoaddingSave}
+          textContent="กำลังบันทึก"
+          animation={"fade"}
+          color={"#0000ff"}
+        />
+        <Awesome
+          visible={visibleAlert}
+          titleIcon={customAlert.titleIcon}
+          showConfirmButton={customAlert.showConfirmButton}
+          showCancelButton={customAlert.showCancelButton}
+          textBody={customAlert.textBody}
+          confirmText={customAlert.confirmText}
+          cancelText={customAlert.cancelText}
+          onConfirmPress={customAlert.onConfirmPress}
+          onCancelPress={customAlert.onCancelPress}
+        />
+        {show && <DateTimePickker />}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -1863,9 +1850,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   dropdown: {
-    height: 40,
-    borderColor: "#2c689e",
-    borderWidth: 1,
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
   },
@@ -1894,13 +1881,5 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
-  },
-  set: {
-    backgroundColor: "#59d090",
-    borderColor: "#59d090",
-  },
-  disabledDropdown: {
-    backgroundColor: "#e0e0e0", // เทาอ่อน
-    borderColor: "#bdbdbd", // เทาเข้ม
   },
 });
