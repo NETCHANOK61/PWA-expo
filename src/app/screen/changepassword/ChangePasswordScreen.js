@@ -285,7 +285,7 @@ const ChangePassword = (props) => {
                         color: '#272a2f',
                         fontSize: 0.014 * height,
                         fontFamily: 'Prompt-bold',
-                    }}>{'Copyright © PWA Field Service (v.1.0.42)'}</Text>
+                    }}>{"Copyright © PWA Field Service (v.1.0.36)"}</Text>
                 </View>
             </View>
         </NativeBaseProvider>

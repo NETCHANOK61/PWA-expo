@@ -1,24 +1,23 @@
 {
   "expo": {
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.37",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
     "splash": {},
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pwa.smart1662.ios"
+      "bundleIdentifier": "com.mycompany.pwa"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "assets/os-icon/prd.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.pwa.smart1662.android",
-      "versionCode": 55
+      "package": "com.mycompany.pwa"
     },
     "web": {
       "favicon": "assets/os-icon/prd.png"

@@ -401,9 +401,9 @@ export default function LoginScreen(props) {
         style={{ alignItems: "center", flex: 8, justifyContent: "flex-end" }}
       >
         <Text style={textsty.text_bold}>
-          {"Copyright © PWA Field Service (v.1.0.42)"}
+          {"Copyright © PWA Field Service (v.1.0.37)"}
         </Text>
-        <Text style={textsty.text_bold}>{"Deverlop Update: 22/11/2567 12.00PM"}</Text>
+        <Text style={textsty.text_bold}>{"Deverlop Update: 24/04/2568 12.00PM"}</Text>
       </View>
       <LoadingSpinner
         width={0.55 * viewportWidth}

@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "newArchEnabled": true,
+    "name": "PWA Field Service-UAT",
+    "slug": "pwa-field-service-uat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "assets/os-icon/uat.png",
+    "userInterfaceStyle": "light",
+    "splash": {},
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mycompany.uat"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "assets/os-icon/uat.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.mycompany.uat"
+    },
+    "web": {
+      "favicon": "assets/os-icon/uat.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "owner": "nineeagle",
+    "extra": {
+      "eas": {
+        "projectId": "5eda1999-f31a-4aa5-b548-788978f7a687"
+      }
+    }
+  }
+}

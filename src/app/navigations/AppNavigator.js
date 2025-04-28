@@ -410,6 +410,17 @@ const SuccessTab = ({ navigation, route }) => {
           name="ReceiveRepair"
           component={ReceiveRepairStackScreen}
           options={Tab1}
+          listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+              // Prevent default action
+              e.preventDefault();
+        
+              // Reset to root of ReceiveRepair stack
+              navigation.navigate("ReceiveRepair", {
+                screen: "ReceiveRepairScreen",
+              });
+            },
+          })}
         />
         <Tab.Screen
           name="WorkRepair"

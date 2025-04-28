@@ -1,10 +1,10 @@
 // const url = `https://smart1662.pwa.co.th`;
 // const url = `http://sitdev.dyndns.org:10000`;
 //Producation
-// const url = 'https://smart1662.pwa.co.th';
+const url = 'https://smart1662.pwa.co.th';
 
 //Test
-const url = 'https://smart1662-test.pwa.co.th';
+// const url = 'https://smart1662-test.pwa.co.th';
 
 export default {
   getToken: `${url}/smapilab/token`,

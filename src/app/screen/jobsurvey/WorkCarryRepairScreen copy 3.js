@@ -11,11 +11,16 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
+import { CheckBox } from "react-native-elements";
 import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import {
+  Select,
+  VStack,
+  CheckIcon,
   NativeBaseProvider,
   HStack,
+  Icon,
 } from "native-base";
 
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -969,6 +974,44 @@ export default function WorkCarryRepairScreen(props) {
     return dataSelect;
   };
 
+  const handleSurfaceAppearance = () => {
+    let _filter = "";
+
+    if (props.data.process != null) {
+      if (props.data.process.surfaceAppearance != "") {
+        if (props.data.process.surfaceAppearance == "0") {
+          _filter = "";
+        } else {
+          _filter = props.getSerfaces.filter((val) => {
+            return val.value == props.data.process.surfaceAppearance;
+          });
+        }
+      } else {
+        _filter = "";
+      }
+    } else {
+      _filter = "";
+    }
+
+    return _filter;
+  };
+
+  const handleSizePipe = () => {
+    let _r = "";
+    if (props.data.process != null) {
+      _r = props.data.process.piplineSize;
+    }
+    return _r;
+  };
+
+  const handleProcessPipes = () => {
+    let _r = "";
+    if (props.data.process != null) {
+      _r = props.data.process.isNotGIS;
+    }
+    return _r;
+  };
+
   // Begin For Android
   const timePicker_A = useCallback(
     (event, selectedDate) => {
@@ -1098,6 +1141,22 @@ export default function WorkCarryRepairScreen(props) {
       default:
         break;
     }
+  };
+
+  const handleRepaireAccountId = () => {
+    let _filter = "";
+    if (props.data.process != null) {
+      if (props.data.process.repaireAccountId != "") {
+        _filter = props.empoyees.filter((val) => {
+          return val.value == props.data.process.repaireAccountId;
+        });
+      } else {
+        _filter = "";
+      }
+    } else {
+      _filter = "";
+    }
+    return _filter;
   };
 
   const disSizePipe = () => {
