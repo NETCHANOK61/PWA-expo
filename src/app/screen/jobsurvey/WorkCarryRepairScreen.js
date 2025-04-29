@@ -13,10 +13,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import {
-  NativeBaseProvider,
-  HStack,
-} from "native-base";
+import { NativeBaseProvider, HStack } from "native-base";
 
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -278,7 +275,7 @@ export default function WorkCarryRepairScreen(props) {
       serfaces: props.data.process.surfaceAppearance?.toString() ?? "",
       empoyees: props.data.process.repaireAccountId?.toString() ?? "",
       processpipes: props.data.process.isNotGIS?.toString() ?? "",
-      leakwound: leakWound_id == "99"? "": leakWound_id,
+      leakwound: leakWound_id == "99" ? "" : leakWound_id,
     }));
 
     // console.log("loadData_savePickerVal:", props.data.process)
@@ -1431,7 +1428,6 @@ export default function WorkCarryRepairScreen(props) {
                     style={[
                       styles.dropdown,
                       empoyeesisFocus && { borderColor: "#2c689e" },
-                      pickerdVal.empoyees,
                     ]}
                     placeholderStyle={textsty.text_normal_regular}
                     selectedTextStyle={textsty.text_normal_regular}
@@ -1453,7 +1449,8 @@ export default function WorkCarryRepairScreen(props) {
                       setEmpoyeesIsFocus(false);
                     }}
                     renderLeftIcon={() =>
-                      pickerdVal.empoyees && (
+                      pickerdVal.empoyees !== "0" &&
+                      pickerdVal.empoyees !== "" && (
                         <AntDesign
                           style={styles.icon}
                           color="green"
@@ -1632,7 +1629,8 @@ export default function WorkCarryRepairScreen(props) {
                         setProcessGISisFocus(false);
                       }}
                       renderLeftIcon={() =>
-                        pickerdVal.processpipes && (
+                        pickerdVal.processpipes !== "0" &&
+                        pickerdVal.processpipes !== "" && (
                           <AntDesign
                             style={styles.icon}
                             color="green"
@@ -1670,6 +1668,7 @@ export default function WorkCarryRepairScreen(props) {
                       setIsFocus(false);
                     }}
                     renderLeftIcon={() =>
+                      pickerdVal.serfaces !== "0" &&
                       pickerdVal.serfaces !== "" && (
                         <AntDesign
                           style={styles.icon}
