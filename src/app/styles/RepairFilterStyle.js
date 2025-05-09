@@ -88,7 +88,7 @@ export default StyleSheet.create({
     height: 0.05 * height,
     paddingHorizontal: 10,
     ...Platform.select({
-      android: { paddingVertical: 0, color: "gray", fontFamily: "Prompt-Bold" },
+      android: { paddingVertical: 0, color: "black", fontFamily: "Prompt-Regular" },
     }),
   },
   input: {

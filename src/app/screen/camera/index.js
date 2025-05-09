@@ -20,7 +20,6 @@ import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as cameraAction from "../../actions/camera/CameraAction";
-import ImageResizer from "react-native-image-resizer";
 
 import styles from "./Style";
 

@@ -3,14 +3,19 @@
     "newArchEnabled": false,
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.39",
+    "version": "2.0.1",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
     "splash": {},
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pwa.smart1662.ios"
+      "bundleIdentifier": "com.pwa.smart1662.ios",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "We need your location to provide field service features.",
+        "NSLocationAlwaysUsageDescription": "We need your location to provide field service features even when the app is in the background."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 58
+      "versionCode": 60
     },
     "web": {
       "favicon": "assets/os-icon/prd.png"
@@ -26,10 +31,9 @@
     "plugins": [
       "expo-font"
     ],
-    "owner": "nineeagle",
     "extra": {
       "eas": {
-        "projectId": "f01f2539-b4cc-43d1-9b50-7525c8c49ba7"
+        "projectId": "ed3ad2bb-0420-4e2a-81b2-671465323c93"
       }
     }
   }
