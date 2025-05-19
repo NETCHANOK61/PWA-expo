@@ -152,97 +152,56 @@ export default function WorkCarryRepairScreen(props) {
   const init = async () => {
     setVisibleLoading(true);
     loadDataSetView();
-    loadDataPinLocationPip();
+
+    if (props.data.process == null) {
+      loadDataPinLocationPip(); // 🔁 เรียกเฉพาะตอนยังไม่มีข้อมูล process
+    }
+
     pickerProcess();
     let checkPermissions = await checkPermissionsAccept();
     if (checkPermissions != true) {
       await requestPermissionsAccept();
     }
   };
+
   useEffect(() => {
     init();
-  }, []);
+  }, [props.data.rwId]);
 
   const loadDataSetView = () => {
-    if (props.data.process == null) {
-      setViewTime();
-    } else {
-      if (workCarrayRepairReducer.rememViewWorkCarray.sts == "1") {
-        setDateTime((current) => ({
-          ...current,
-          dateForm:
-            props.data.process.fromProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.fromProcessDate),
-          dateTo:
-            props.data.process.toProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.toProcessDate),
-          dateTextTure:
-            props.data.process.surfaceFixedDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.surfaceFixedDate),
-          timeFrom:
-            props.data.process.fromProcessTime == ""
-              ? timeNow()
-              : props.data.process.fromProcessTime,
-          timeTo:
-            props.data.process.toProcessTime == ""
-              ? timeNow()
-              : props.data.process.toProcessTime,
-          timeTextTrue:
-            props.data.process.surfaceFixedTime == ""
-              ? timeNow()
-              : props.data.process.surfaceFixedTime,
-        }));
+    const process = props.data?.process;
 
-        const obj = {
-          sts: "2",
-          dateForm:
-            props.data.process.fromProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.fromProcessDate),
-          dateTo:
-            props.data.process.toProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.toProcessDate),
-          dateTextTure:
-            props.data.process.surfaceFixedDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.surfaceFixedDate),
-          timeFrom:
-            props.data.process.fromProcessTime == ""
-              ? timeNow()
-              : props.data.process.fromProcessTime,
-          timeTo:
-            props.data.process.toProcessTime == ""
-              ? timeNow()
-              : props.data.process.toProcessTime,
-          timeTextTrue:
-            props.data.process.surfaceFixedTime == ""
-              ? timeNow()
-              : props.data.process.surfaceFixedTime,
-        };
-
-        dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
-      } else {
-        setViewTime();
-      }
-
-      setBrokenAppearance(
-        props.data.process.brokenAppearance == ""
-          ? ""
-          : props.data.process.brokenAppearance
-      );
-
-      toggleChecked(
-        props.data.process.isNotGIS == "0" || props.data.process.isNotGIS == ""
-          ? false
-          : true
-      );
-      loadData_saveSizeHole();
-      loadData_savePickerVal();
+    if (!process) {
+      setDateTime({
+        dateForm: dateNowTh(),
+        dateTo: dateNowTh(),
+        dateTextTure: dateNowTh(),
+        timeFrom: timeNow(),
+        timeTo: timeNow(),
+        timeTextTrue: timeNow(),
+      });
+      return;
     }
+
+    setDateTime({
+      dateForm: process.fromProcessDate
+        ? convertDateServiceToDateTh(process.fromProcessDate)
+        : dateNowTh(),
+      dateTo: process.toProcessDate
+        ? convertDateServiceToDateTh(process.toProcessDate)
+        : dateNowTh(),
+      dateTextTure: process.surfaceFixedDate
+        ? convertDateServiceToDateTh(process.surfaceFixedDate)
+        : dateNowTh(),
+      timeFrom: process.fromProcessTime || timeNow(),
+      timeTo: process.toProcessTime || timeNow(),
+      timeTextTrue: process.surfaceFixedTime || timeNow(),
+    });
+
+    setBrokenAppearance(process.brokenAppearance || "");
+    toggleChecked(process.isNotGIS === "1");
+    loadData_saveSizeHole();
+    loadData_savePickerVal();
     setVisibleLoading(false);
   };
 
@@ -278,7 +237,7 @@ export default function WorkCarryRepairScreen(props) {
       leakwound: leakWound_id == "99" ? "" : leakWound_id,
     }));
 
-    // console.log("loadData_savePickerVal:", props.data.process)
+    // console.log("loadData_savePickerVal:", props.data.process);
     sizeofpipe(props.data.process.piplineType);
   };
 
@@ -380,37 +339,44 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const setSateDataParams = (key, value) => {
-    setDateTime((currentState) => ({ ...currentState, [key]: value }));
-    const obj = {
-      sts: "2",
-      dateForm:
-        key == "dateForm"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateForm,
-      dateTo:
-        key == "dateTo"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateTo,
-      dateTextTure:
-        key == "dateTextTure"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateTextTure,
-      timeFrom:
-        key == "timeFrom"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeFrom,
-      timeTo:
-        key == "timeTo"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeTo,
-      timeTextTrue:
-        key == "timeTextTrue"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeTextTrue,
-    };
-
-    dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
+    setDateTime((currentState) => ({
+      ...currentState,
+      [key]: value,
+    }));
   };
+
+  // const setSateDataParams = (key, value) => {
+  //   setDateTime((currentState) => ({ ...currentState, [key]: value }));
+  //   const obj = {
+  //     sts: "2",
+  //     dateForm:
+  //       key == "dateForm"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.dateForm,
+  //     dateTo:
+  //       key == "dateTo"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.dateTo,
+  //     dateTextTure:
+  //       key == "dateTextTure"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.dateTextTure,
+  //     timeFrom:
+  //       key == "timeFrom"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.timeFrom,
+  //     timeTo:
+  //       key == "timeTo"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.timeTo,
+  //     timeTextTrue:
+  //       key == "timeTextTrue"
+  //         ? value
+  //         : workCarrayRepairReducer.rememViewWorkCarray.timeTextTrue,
+  //   };
+
+  //   dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
+  // };
 
   const sizeofpipe = async (value) => {
     // console.log("sizeofpipe", value)
