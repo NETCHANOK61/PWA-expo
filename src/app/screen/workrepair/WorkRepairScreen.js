@@ -114,6 +114,13 @@ export default function WorkRepairScreen(props) {
 
     setVisibleLoading(true);
     setIsVisible(false);
+    const jobCode = rwId;
+
+    props.navigation.navigate("workrepairtabscreen", {
+      job_code: jobCode,
+      rwcode: jobCode,
+      page: "1",
+    });
   };
 
   const renderRow = ({ item, index }) => {

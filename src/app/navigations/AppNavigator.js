@@ -414,7 +414,7 @@ const SuccessTab = ({ navigation, route }) => {
             tabPress: (e) => {
               // Prevent default action
               e.preventDefault();
-        
+
               // Reset to root of ReceiveRepair stack
               navigation.navigate("ReceiveRepair", {
                 screen: "ReceiveRepairScreen",
@@ -470,10 +470,11 @@ const MyTab = ({ navigation, route }) => {
     const setHeaderOptions = (options) => {
       navigation.setOptions(options);
     };
-  
+
     // Condition for "WorkTakePhotoScreen" and "camera" routes
-    const isHiddenHeader = routeName === "WorkTakePhotoScreen" || routeName === "camera";
-  
+    const isHiddenHeader =
+      routeName === "WorkTakePhotoScreen" || routeName === "camera";
+
     if (isHiddenHeader) {
       setHeaderOptions({
         headerShown: false,
@@ -511,8 +512,8 @@ const MyTab = ({ navigation, route }) => {
         ),
       });
     }
-  }, [routeName]);
-  
+  }, [routeName, route.params?.rwcode]);
+
   return (
     <StackJobSurvey.Navigator
       initialRouteName="mainTabScreen"
