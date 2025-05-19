@@ -3,7 +3,7 @@
     "newArchEnabled": false,
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "2.0.1",
+    "version": "2.0.4",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.pwa.smart1662.ios",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "This app requires access to the camera to take on-site photos as part of the service inspection process.",
         "NSLocationWhenInUseUsageDescription": "We need your location to provide field service features.",
         "NSLocationAlwaysUsageDescription": "We need your location to provide field service features even when the app is in the background."
       }

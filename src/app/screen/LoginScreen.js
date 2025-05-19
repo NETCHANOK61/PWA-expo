@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import * as LoginAction from "../actions/LoginAction";
 import { useSelector, useDispatch } from "react-redux";
+import { getRememberLogin, getCheckEmployee } from "../utils/Storage";
 const { width: viewportWidth, height: viewportHeight } =
   Dimensions.get("window");
 import { CheckBox } from "react-native-elements";
@@ -55,19 +56,33 @@ export default function LoginScreen(props) {
     onCancelPress: () => {},
   });
 
-  const init = async () => {
-    const remem = await getRememberLogin().then((data) => {
-      return data;
-    });
+  // const init = async () => {
+  //   const remem = await getRememberLogin().then((data) => {
+  //     return data;
+  //   });
 
-    const checkEmployee = await getCheckEmployee().then((data) => {
-      return data;
-    });
+  //   const checkEmployee = await getCheckEmployee().then((data) => {
+  //     return data;
+  //   });
+
+  //   if (remem != null) {
+  //     setUsername(remem.username);
+  //     setPassword(remem.password);
+  //     setTogleCheckEmployee(checkEmployee == "1" ? true : false);
+  //     toggleChecked(true);
+  //   } else {
+  //     toggleChecked(false);
+  //   }
+  // };
+  const init = async () => {
+    const remem = await getRememberLogin();
+    const checkEmployee = await getCheckEmployee();
 
     if (remem != null) {
+      // console.log("📥 REMEM Loaded into State:", remem.username, remem.password);
       setUsername(remem.username);
       setPassword(remem.password);
-      setTogleCheckEmployee(checkEmployee == "1" ? true : false);
+      setTogleCheckEmployee(checkEmployee == "1");
       toggleChecked(true);
     } else {
       toggleChecked(false);
@@ -77,6 +92,7 @@ export default function LoginScreen(props) {
   useEffect(() => {
     init();
   }, []);
+
   const setStateAlert = (
     _titleIcon,
     _showConfirmButton,
@@ -403,7 +419,9 @@ export default function LoginScreen(props) {
         <Text style={textsty.text_bold}>
           {"Copyright © PWA Field Service (v.1.0.42)"}
         </Text>
-        <Text style={textsty.text_bold}>{"Deverlop Update: 24/04/2568 12.00PM"}</Text>
+        <Text style={textsty.text_bold}>
+          {"Deverlop Update: 24/04/2568 12.00PM"}
+        </Text>
       </View>
       <LoadingSpinner
         width={0.55 * viewportWidth}
@@ -435,4 +453,4 @@ export default function LoginScreen(props) {
       />
     </ImageBackground>
   );
-};
+}
