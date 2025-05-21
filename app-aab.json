@@ -3,7 +3,7 @@
     "newArchEnabled": false,
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.42",
+    "version": "1.0.44",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 59
+      "versionCode": 61
     },
     "web": {
       "favicon": "assets/os-icon/prd.png"

@@ -423,8 +423,9 @@ export default function Map(props) {
           cusLocation.longitude
         } != '' ){
                     DrawMarker();
-                }
+                }else{
                 mymap.on('click', onAddMarker);
+                }
                 
                 centerLeafletMapOnMarker(mymap, markerJob);
                 //mymap.on('click', onAddMarker); // 1/12/2021

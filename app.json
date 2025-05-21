@@ -1,16 +1,25 @@
 {
   "expo": {
-    "newArchEnabled": false,
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.44",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
-    "splash": {},
+    "splash": {
+      "image": "assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pwa.smart1662.ios"
+      "bundleIdentifier": "com.pwa.smart1662.ios",
+      "buildNumber": "2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take photos for service reporting.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to tag service locations.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +27,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 61
+      "versionCode": 61,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "assets/os-icon/prd.png"
