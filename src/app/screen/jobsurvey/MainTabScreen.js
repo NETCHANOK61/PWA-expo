@@ -26,35 +26,35 @@ export default function MainTabScreen({ props, navigation }) {
   const [index, setIndex] = React.useState(0);
 
   const init = () => {
-    let brokenAppearanceText = "";
-    if (workRepairDetailReducer.dataArray.process != null) {
-      brokenAppearanceText =
-        workRepairDetailReducer.dataArray.process.brokenAppearance;
-    }
-    dispatch(workCarryRepairAction.loadPiker(brokenAppearanceText));
-    reMemViewWorkCarryRepair();
-    return () => {};
+    // let brokenAppearanceText = "";
+    // if (workRepairDetailReducer.dataArray.process != null) {
+    //   brokenAppearanceText =
+    //     workRepairDetailReducer.dataArray.process.brokenAppearance;
+    // }
+    // dispatch(workCarryRepairAction.loadPiker(brokenAppearanceText));
+    // reMemViewWorkCarryRepair();
+    // return () => {};
   };
   useEffect(() => {
     init();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (route.params?.job_code) {
-        setJobCode(route.params.job_code);
-        navigation.setOptions({
-          title: route.params.job_code,
-          headerTitleAlign: "center",
-          headerTitleStyle: {
-            fontFamily: "Prompt-Bold",
-            fontSize: 18,
-            color: "#2c689e",
-          },
-        });
-      }
-    }, [route.params?.job_code])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (route.params?.job_code) {
+  //       setJobCode(route.params.job_code);
+  //       navigation.setOptions({
+  //         title: route.params.job_code,
+  //         headerTitleAlign: "center",
+  //         headerTitleStyle: {
+  //           fontFamily: "Prompt-Bold",
+  //           fontSize: 18,
+  //           color: "#2c689e",
+  //         },
+  //       });
+  //     }
+  //   }, [route.params?.job_code])
+  // );
 
   const reMemViewWorkCarryRepair = () => {
     if (workRepairDetailReducer.dataArray.process != null) {
@@ -175,34 +175,72 @@ export default function MainTabScreen({ props, navigation }) {
     return arrr1;
   };
 
-  const renderScene = SceneMap({
-    workrepairdetail: () => (
-      <WorkRepairDetailScreen
-        {...props}
-        navigation={navigation}
-        data={workRepairDetailReducer.dataArray}
-      />
-    ),
-    worksurvey: () => (
-      <WorkSurveyScreen
-        {...props}
-        navigation={navigation}
-        data={workRepairDetailReducer.dataArray}
-      />
-    ),
-    workCarryRepair: () => (
-      <WorkCarryRepairScreen
-        {...props}
-        navigation={navigation}
-        empoyees={empoyees()}
-        getLeakwounds={getLeakwounds()}
-        getSerfaces={getSerfaces()}
-        getTypeOfPipes={getTypeOfPipes()}
-        getRequestTyp={getRequestType()}
-        data={workRepairDetailReducer.dataArray}
-      />
-    ),
-  });
+  // const renderScene = SceneMap({
+  //   workrepairdetail: () => (
+  //     <WorkRepairDetailScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  //   worksurvey: () => (
+  //     <WorkSurveyScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  //   workCarryRepair: () => (
+  //     <WorkCarryRepairScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       empoyees={empoyees()}
+  //       getLeakwounds={getLeakwounds()}
+  //       getSerfaces={getSerfaces()}
+  //       getTypeOfPipes={getTypeOfPipes()}
+  //       getRequestTyp={getRequestType()}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  // });
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case "workrepairdetail":
+        return (
+          <WorkRepairDetailScreen
+            {...props}
+            navigation={navigation}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      case "worksurvey":
+        return (
+          <WorkSurveyScreen
+            {...props}
+            navigation={navigation}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      case "workCarryRepair":
+        return (
+          // <View>
+          //   <Text>workCarryRepair</Text>
+          // </View>
+          <WorkCarryRepairScreen
+            {...props}
+            navigation={navigation}
+            empoyees={empoyees()}
+            getLeakwounds={getLeakwounds()}
+            getSerfaces={getSerfaces()}
+            getTypeOfPipes={getTypeOfPipes()}
+            getRequestTyp={getRequestType()}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   const switchTab = (idTab) => {
     setIndex(idTab);

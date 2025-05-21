@@ -150,7 +150,7 @@ export default function WorkCarryRepairScreen(props) {
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
   const init = async () => {
-    setVisibleLoading(true);
+    // setVisibleLoading(true);
     loadDataSetView();
 
     if (props.data.process == null) {
@@ -242,36 +242,42 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const loadDataPinLocationPip = () => {
-    toggleCheckedLat(
-      !workRepairDetailReducer.dataArray.survey.latitude ||
-        !workRepairDetailReducer.dataArray.survey.longtitude
-    );
+    console.log("loadDataPinLocationPip");
+
+    const survey = workRepairDetailReducer.dataArray?.survey || {};
+    const savePoint = saveLocationPointNormalReducer.dataObj || {};
+
+    // เช็กค่าพิกัดว่ามีหรือไม่
+    const hasNoCoordinates = !survey.latitude || !survey.longtitude;
+    toggleCheckedLat(hasNoCoordinates);
+
     if (saveLocationPointNormalReducer.dataObj != null) {
-      setPickerdVal((_state) => ({
-        ..._state,
-        tpyofpipes: saveLocationPointNormalReducer.dataObj.piplineType,
-        sizeofpipes: saveLocationPointNormalReducer.dataObj.piplineSize,
-        processpipes:
-          saveLocationPointNormalReducer.dataObj.piplineType != null ||
-          saveLocationPointNormalReducer.dataObj.piplineSize != null
-            ? "0"
-            : "",
+      const { piplineType, piplineSize } = savePoint;
+
+      setPickerdVal((prev) => ({
+        ...prev,
+        tpyofpipes: piplineType || "",
+        sizeofpipes: piplineSize || "",
+        processpipes: piplineType || piplineSize ? "0" : "",
       }));
-      sizeofpipe(saveLocationPointNormalReducer.dataObj.piplineType);
+
+      sizeofpipe(piplineType);
     } else {
-      setPickerdVal((_state) => ({
-        ..._state,
-        tpyofpipes: workRepairDetailReducer.dataArray.survey.piplineType,
-        sizeofpipes: workRepairDetailReducer.dataArray.survey.piplineSize,
+      const { piplineType, piplineSize } = survey;
+
+      setPickerdVal((prev) => ({
+        ...prev,
+        tpyofpipes: piplineType || "",
+        sizeofpipes: piplineSize || "",
         processpipes:
-          workRepairDetailReducer.dataArray.survey.piplineType == ""
-            ? ""
-            : workRepairDetailReducer.dataArray.survey.piplineType != null &&
-              workRepairDetailReducer.dataArray.survey.piplineSize != null
-            ? "0"
-            : "",
+          piplineType && piplineSize ? "0" : piplineType === "" ? "" : "",
       }));
-      sizeofpipe(workRepairDetailReducer.dataArray.survey.piplineType);
+
+      sizeofpipe(piplineType);
+
+      console.log("survey:", survey);
+      console.log("savePoint:", savePoint);
+      console.log("toggleCheckedLat:", hasNoCoordinates);
     }
   };
 

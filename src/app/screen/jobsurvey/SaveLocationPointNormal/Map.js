@@ -370,7 +370,7 @@ export default function Map(props) {
                 ////Codeding MAP
                 mymap = L.map('map',{
                     layers: [wmsLayer_gis_pipe, wmsLayer_gis_house, googleHybrid]
-                }).setView([${location.latitude},${location.longitude}], 30);
+                }).setView([${location.latitude},${location.longitude}], 16);
         
                 mymap.options.minZoom = 10;
                 // mymap.options.maxZoom = 22;
@@ -423,9 +423,9 @@ export default function Map(props) {
           cusLocation.longitude
         } != '' ){
                     DrawMarker();
-                }else{
-                    mymap.on('click', onAddMarker);
                 }
+                mymap.on('click', onAddMarker);
+                
                 centerLeafletMapOnMarker(mymap, markerJob);
                 //mymap.on('click', onAddMarker); // 1/12/2021
             }
