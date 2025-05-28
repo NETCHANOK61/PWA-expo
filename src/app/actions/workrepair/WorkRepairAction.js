@@ -24,7 +24,7 @@ export const setStateWorkRepairFailed = () => ({
   type: type,
 });
 
-export const loadDataWitchPost = props => {
+export const loadDataWitchPost = (props, callback) => {
   let date = new Date();
   let inform_Date_Start = date.setDate(date.getDate() - 3);
   return async dispatch => {
@@ -48,9 +48,10 @@ export const loadDataWitchPost = props => {
       await callApi(req)
         .then(async res => {
           dispatch(setStateWorkRepairSuccess(res.data.result));
+          if (callback) callback(); // ✅ เรียก callback เมื่อเสร็จ
         })
         .catch(error => {
-          console.log(error);
+          // console.log(error);
           checkedToken(error, props);
           dispatch(setStateWorkRepairFailed());
         });
@@ -89,7 +90,7 @@ export const loadDataWitchPostFilter = (
       };
       await callApi(req)
         .then(async res => {
-          // console.log(res);
+          // console.log("✅ API response", res.data.result);
           if (res.data.result.length > 0) {
             dispatch(setStateWorkRepairSuccess(res.data.result));
             callback(1);

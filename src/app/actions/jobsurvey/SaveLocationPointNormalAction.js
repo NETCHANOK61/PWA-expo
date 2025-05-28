@@ -77,7 +77,7 @@ export const saveLocationPointNormal = (props, location, capture, mapSnap, callB
           checkedToken(error, props);
         });
     } catch (error) {
-      console.log(errro);
+      console.log(error);
     }
   };
 };

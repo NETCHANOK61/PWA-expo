@@ -32,56 +32,63 @@ export const login = (
 ) => {
   return async (dispatch) => {
     try {
-      const reqdata = `username=${encodeURIComponent(
-        username
-      )}&password=${encodeURIComponent(
-        password
-      )}&grant_type=password&isemployee=${
-        togleCheckEmployee == true ? false : true
-      }&appversion=v.1.0.41`;
+      const reqdata = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=password&isemployee=${togleCheckEmployee === true ? false : true}&appversion=v.1.0.41`;
 
       await loaddata(reqdata)
         .then(async (res) => {
-          //console.log('USER DATA', res.data)
+          // console.log("✅ USER DATA", res.data);
+
           dispatch(setStateToLogin(res.data));
-          setStorage(JSON.stringify(setStore(res.data)));
-          if (checked) {
-            await setRememberLogin({ username, password });
-            await setCheckEmployee(togleCheckEmployee == true ? "1" : null);
-          } else {
-            await removeRemem();
-            await setCheckEmployee(togleCheckEmployee == true ? "1" : null);
+
+          // 🔒 เขียน Storage อย่างปลอดภัย
+          try {
+            await setStorage(JSON.stringify(setStore(res.data)));
+            if (checked) {
+              await setRememberLogin({ username, password });
+              await setCheckEmployee(togleCheckEmployee === true ? "1" : null);
+            } else {
+              await removeRemem();
+              await setCheckEmployee(togleCheckEmployee === true ? "1" : null);
+            }
+          } catch (storageErr) {
+            console.log("❗ Storage write failed:", storageErr);
           }
+
           hideLoading();
-          if (res.data.role_name == "ว่าง" || res.data.role_name == "ตรวจสอบ") {
-            showalert("ALERT_LOGIN_FAILED2");
-            dispatch(setStateToFailed());
-          } else if (res.data.user_active == "false") {
+
+          const { role_name, user_active, user_expire } = res.data;
+
+          // ✅ ตรวจเฉพาะเงื่อนไขจริงจังเท่านั้น
+          if (user_active === "false") {
             showalert("USER_NOT_ACTIVE");
             dispatch(setStateToFailed());
-          } else if (res.data.user_expire == "true") {
+          } else if (user_expire === "true") {
             showalert("EXPIRE_PASSWORD");
             dispatch(setStateToFailed());
           } else {
+            // console.log("➡️ Navigating to Success screen...");
             props.navigation.dispatch(StackActions.replace("Success"));
           }
         })
         .catch((error) => {
           hideLoading();
-          // console.log("e->", error.response)
-          if (error.response.status == 400) {
-            setTimeout(() => {
-              showalert("ALERT_LOGIN_FAILED");
-            }, 500);
-          } else if (error.response.status == 500) {
-            setTimeout(() => {
-              showalert("ALERT_LOGIN_FAILED2");
-            }, 500);
+
+          const status = error?.response?.status;
+          // console.log("❌ Login failed:", error?.message);
+
+          if (status === 400) {
+            setTimeout(() => showalert("ALERT_LOGIN_FAILED"), 500);
+          } else if (status === 500) {
+            setTimeout(() => showalert("ALERT_LOGIN_FAILED2"), 500);
+          } else {
+            setTimeout(() => showalert("ALERT_LOGIN_FAILED2"), 500);
           }
+
           dispatch(setStateToFailed());
         });
     } catch (error) {
-      console.log(error);
+      // console.log("❌ Uncaught error in login():", error.message);
+      hideLoading();
       dispatch(setStateToFailed());
     }
   };

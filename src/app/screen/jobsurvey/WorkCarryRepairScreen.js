@@ -157,7 +157,9 @@ export default function WorkCarryRepairScreen(props) {
       loadDataPinLocationPip(); // 🔁 เรียกเฉพาะตอนยังไม่มีข้อมูล process
     }
 
+    // console.log(workRepairDetailReducer.radioPipe);
     pickerProcess();
+
     let checkPermissions = await checkPermissionsAccept();
     if (checkPermissions != true) {
       await requestPermissionsAccept();
@@ -166,7 +168,14 @@ export default function WorkCarryRepairScreen(props) {
 
   useEffect(() => {
     init();
+    // console.log(props.getLeakwounds);
   }, [props.data.rwId]);
+
+  useEffect(() => {
+    if (workRepairDetailReducer?.dataArray?.survey) {
+      loadDataPinLocationPip(); // เรียกใหม่เมื่อค่าใน survey เปลี่ยน
+    }
+  }, [workRepairDetailReducer.dataArray.survey]);
 
   const loadDataSetView = () => {
     const process = props.data?.process;
@@ -242,8 +251,6 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const loadDataPinLocationPip = () => {
-    console.log("loadDataPinLocationPip");
-
     const survey = workRepairDetailReducer.dataArray?.survey || {};
     const savePoint = saveLocationPointNormalReducer.dataObj || {};
 
@@ -275,9 +282,9 @@ export default function WorkCarryRepairScreen(props) {
 
       sizeofpipe(piplineType);
 
-      console.log("survey:", survey);
-      console.log("savePoint:", savePoint);
-      console.log("toggleCheckedLat:", hasNoCoordinates);
+      // console.log("survey:", survey);
+      // console.log("savePoint:", savePoint);
+      // console.log("toggleCheckedLat:", hasNoCoordinates);
     }
   };
 
@@ -1445,7 +1452,7 @@ export default function WorkCarryRepairScreen(props) {
                     selectedTextStyle={textsty.text_normal_regular}
                     inputSearchStyle={textsty.text_normal_regular}
                     iconStyle={styles.iconStyle}
-                    data={props.getLeakwounds}
+                    data={props.getLeakwounds.filter((item) => item.value !== "99")}
                     search
                     maxHeight={300}
                     labelField="label"
@@ -1601,7 +1608,6 @@ export default function WorkCarryRepairScreen(props) {
                         setProcessGISisFocus(false);
                       }}
                       renderLeftIcon={() =>
-                        pickerdVal.processpipes !== "0" &&
                         pickerdVal.processpipes !== "" && (
                           <AntDesign
                             style={styles.icon}

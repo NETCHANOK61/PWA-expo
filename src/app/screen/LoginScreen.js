@@ -11,7 +11,9 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Platform
 } from "react-native";
+import Constants from "expo-constants";
 import * as LoginAction from "../actions/LoginAction";
 import { useSelector, useDispatch } from "react-redux";
 import { getRememberLogin, getCheckEmployee } from "../utils/Storage";
@@ -29,6 +31,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function LoginScreen(props) {
+  const appVersion = Constants?.expoConfig?.version || "10.0.42";
   const dispatch = useDispatch();
   const ref_inputPassword = useRef();
 
@@ -417,10 +420,10 @@ export default function LoginScreen(props) {
         style={{ alignItems: "center", flex: 8, justifyContent: "flex-end" }}
       >
         <Text style={textsty.text_bold}>
-          {"Copyright © PWA Field Service (v.1.0.42)"}
+          {`Copyright © PWA Field Service (${appVersion})`}
         </Text>
         <Text style={textsty.text_bold}>
-          {"Deverlop Update: 24/04/2568 12.00PM"}
+          {"Deverlop Update: 28/05/2568 12.00 PM"}
         </Text>
       </View>
       <LoadingSpinner

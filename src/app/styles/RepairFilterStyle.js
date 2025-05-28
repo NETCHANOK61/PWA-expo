@@ -82,6 +82,7 @@ export default StyleSheet.create({
   },
   textInput: {
     fontFamily: "Prompt-Regular",
+    color: "#000",
     fontSize: 0.02 * height,
     borderRadius: 5,
     width: "100%",
