@@ -423,7 +423,7 @@ export default function LoginScreen(props) {
           {`Copyright © PWA Field Service (${appVersion})`}
         </Text>
         <Text style={textsty.text_bold}>
-          {"Deverlop Update: 28/05/2568 12.00 PM"}
+          {"Deverlop Update: 01/06/2568 09.00 AM"}
         </Text>
       </View>
       <LoadingSpinner

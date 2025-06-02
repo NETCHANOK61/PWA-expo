@@ -67,6 +67,7 @@ export default function Savelocation(props) {
     (state) => state.workRepairDetailReducer
   );
 
+
   const init = async (isFocused) => {
     let checkPermissions = await checkLocationAccept();
     if (checkPermissions != true) {

@@ -56,6 +56,25 @@ export default function MainTabScreen({ props, navigation }) {
   //   }, [route.params?.job_code])
   // );
 
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.job_code) {
+        setJobCode(route.params.job_code);
+        navigation.setOptions({
+          title: route.params.job_code,
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: "Prompt-Bold",
+            fontSize: 18,
+            color: "#2c689e",
+          },
+        });
+
+        reMemViewWorkCarryRepair(); // ✅ เพิ่มตรงนี้
+      }
+    }, [route.params?.job_code])
+  );
+
   const reMemViewWorkCarryRepair = () => {
     if (workRepairDetailReducer.dataArray.process != null) {
       if (workRepairDetailReducer.dataArray.survey.pipe_id == "") {

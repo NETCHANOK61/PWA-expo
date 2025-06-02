@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pwa.smart1662.ios",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos for service reporting.",
         "NSLocationWhenInUseUsageDescription": "This app uses your location to tag service locations.",
@@ -27,7 +27,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 63,
+      "versionCode": 67,
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION"
@@ -41,7 +41,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "ed3ad2bb-0420-4e2a-81b2-671465323c93"
+        "projectId": "f01f2539-b4cc-43d1-9b50-7525c8c49ba7"
       }
     }
   }

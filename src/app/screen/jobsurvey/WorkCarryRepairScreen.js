@@ -150,32 +150,56 @@ export default function WorkCarryRepairScreen(props) {
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
   const init = async () => {
-    // setVisibleLoading(true);
+    // console.log(workRepairDetailReducer.dataArray.survey.pipe_id)
+    // ✅ เคลียร์ state เดิมก่อนโหลดข้อมูลใหม่
+    setDateTime({
+      dateForm: "",
+      dateTo: "",
+      dateTextTure: "",
+      timeFrom: "",
+      timeTo: "",
+      timeTextTrue: "",
+    });
+
+    setPickerdVal({
+      empoyees: "",
+      serfaces: "",
+      tpyofpipes: "",
+      sizeofpipes: "",
+      processpipes: "",
+      leakwound: "",
+      leakwound_s: "",
+    });
+
+    setBrokenAppearance("");
+    setHoleDepth("");
+    setHoleLength("");
+    setHoleWidth("");
+    setArrPipeSize([]);
+    setArrProcessGIS([]);
+    toggleChecked(false);
+    toggleCheckedLat(false);
+    setToggleCheckedSizePipe(false);
+
+    // ✅ โหลดข้อมูลใหม่
     loadDataSetView();
-
-    if (props.data.process == null) {
-      loadDataPinLocationPip(); // 🔁 เรียกเฉพาะตอนยังไม่มีข้อมูล process
-    }
-
-    // console.log(workRepairDetailReducer.radioPipe);
-    pickerProcess();
+    loadDataPinLocationPip();
 
     let checkPermissions = await checkPermissionsAccept();
-    if (checkPermissions != true) {
-      await requestPermissionsAccept();
-    }
+    if (!checkPermissions) await requestPermissionsAccept();
   };
 
   useEffect(() => {
-    init();
-    // console.log(props.getLeakwounds);
-  }, [props.data.rwId]);
-
-  useEffect(() => {
-    if (workRepairDetailReducer?.dataArray?.survey) {
-      loadDataPinLocationPip(); // เรียกใหม่เมื่อค่าใน survey เปลี่ยน
+    if (props.data && props.data.rwId) {
+      init();
     }
-  }, [workRepairDetailReducer.dataArray.survey]);
+  }, [props.data.rwId, workRepairDetailReducer.dataArray.survey]);
+
+  // useEffect(() => {
+  //   if (workRepairDetailReducer?.dataArray?.survey) {
+  //     loadDataPinLocationPip(); // เรียกใหม่เมื่อค่าใน survey เปลี่ยน
+  //   }
+  // }, [workRepairDetailReducer.dataArray.survey]);
 
   const loadDataSetView = () => {
     const process = props.data?.process;
@@ -253,6 +277,8 @@ export default function WorkCarryRepairScreen(props) {
   const loadDataPinLocationPip = () => {
     const survey = workRepairDetailReducer.dataArray?.survey || {};
     const savePoint = saveLocationPointNormalReducer.dataObj || {};
+    // console.log(survey.latitude);
+    // console.log(survey.longtitude);
 
     // เช็กค่าพิกัดว่ามีหรือไม่
     const hasNoCoordinates = !survey.latitude || !survey.longtitude;
@@ -286,6 +312,7 @@ export default function WorkCarryRepairScreen(props) {
       // console.log("savePoint:", savePoint);
       // console.log("toggleCheckedLat:", hasNoCoordinates);
     }
+    pickerProcess();
   };
 
   const loadData_saveSizeHole = () => {
@@ -413,17 +440,22 @@ export default function WorkCarryRepairScreen(props) {
 
   const pickerProcess = () => {
     let pickerProcessArrr = [];
-    if (workRepairDetailReducer.radioPipe == "1") {
+    // 29/05/2025
+    // console.log(workRepairDetailReducer.radioPipe);
+    if (workRepairDetailReducer.dataArray.survey.pipe_id) {
+      // console.log('workRepairDetailReducer.radioPipe == 1')
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" }
       );
-    } else if (workRepairDetailReducer.radioPipe == "2") {
+    } else if (workRepairDetailReducer.dataArray.survey.pipe_id == "") {
+      // console.log('workRepairDetailReducer.radioPipe == 2')
       pickerProcessArrr.push(
         { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
         { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
       );
     } else {
+      // console.log('workRepairDetailReducer.radioPipe == 0')
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" },
@@ -1452,7 +1484,9 @@ export default function WorkCarryRepairScreen(props) {
                     selectedTextStyle={textsty.text_normal_regular}
                     inputSearchStyle={textsty.text_normal_regular}
                     iconStyle={styles.iconStyle}
-                    data={props.getLeakwounds.filter((item) => item.value !== "99")}
+                    data={props.getLeakwounds.filter(
+                      (item) => item.value !== "99"
+                    )}
                     search
                     maxHeight={300}
                     labelField="label"
