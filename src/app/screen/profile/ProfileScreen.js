@@ -149,13 +149,14 @@ const ProfileScreen = (props) => {
       {
         text: "ยืนยัน",
         onPress: () => {
+          removeStore();
+          removeRemem();
+          removeCheckEmployee();
+          dispatch({ type: "ACTION_LOGOUT" });
           props.navigation.reset({
             index: 0,
             routes: [{ name: "Login" }],
           });
-          removeStore();
-          removeRemem();
-          removeCheckEmployee();
         },
         style: "cancel",
       },

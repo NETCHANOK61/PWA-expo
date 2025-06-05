@@ -126,11 +126,15 @@ const ReceiveRepairStackScreen = ({ navigation, route }) => {
           headerRight: () => (
             <TouchableOpacity
               activeOpacity={0.1}
-              onPress={async () => {
+              onPress={() => {
                 navigation.navigate("ReceiveRepair", {
                   screen: "ReceiveRepairSearchScreen",
+                  params: {
+                    backTab: "ReceiveRepair",
+                    backScreen: "ReceiveRepairScreen",
+                    prevFilter: route.params?.filterResult,
+                  },
                 });
-                // dispatch(repairFilterAction.inncidentSearch(navigation));
               }}
               style={{ padding: 10 }}
             >
@@ -290,8 +294,16 @@ const WorkRepairStackScreen = ({ navigation, route }) => {
                 // navigation.navigate("WorkRepairStackScreen", {
                 //   screen: "ReceiveRepairSearchScreen2",
                 // });
+                // navigation.navigate("WorkRepair", {
+                //   screen: "ReceiveRepairSearchScreen2",
+                // });
                 navigation.navigate("WorkRepair", {
                   screen: "ReceiveRepairSearchScreen2",
+                  params: {
+                    backTab: "WorkRepair",
+                    backScreen: "workrepairscreen",
+                    prevFilter: route.params?.filterResult,
+                  },
                 });
               }}
               style={{ padding: 10 }}

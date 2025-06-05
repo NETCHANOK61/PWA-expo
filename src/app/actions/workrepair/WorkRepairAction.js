@@ -4,6 +4,7 @@ import {
   ACTION_JSON_WORKREPAIR_FETCHING,
   ACTION_JSON_WORKREPAIR_SUCCESS,
   ACTION_JSON_WORKREPAIR_FAILED,
+  SET_WORK_REPAIR_SEARCH_PARAMS
 } from '../../Constants';
 import url from '../UrlAction';
 import { getToken } from '../../utils/Storage';
@@ -24,18 +25,61 @@ export const setStateWorkRepairFailed = () => ({
   type: type,
 });
 
-export const loadDataWitchPost = (props, callback) => {
-  let date = new Date();
-  let inform_Date_Start = date.setDate(date.getDate() - 3);
+export const setWorkRepairSearchParams = (payload) => ({
+  type: SET_WORK_REPAIR_SEARCH_PARAMS,
+  payload,
+});
+
+// export const loadDataWitchPost = (props, callback) => {
+//   let date = new Date();
+//   let inform_Date_Start = date.setDate(date.getDate() - 3);
+//   return async dispatch => {
+//     try {
+//       dispatch(setStateWorkRepairFetching());
+//       const req = {
+//         rwCode: '',
+//         customerName: '',
+//         telephone: '',
+//         informDateStart: moment(inform_Date_Start).format('YYYYMMDD'),
+//         informDateEnd: '',
+//         status: '',
+//         pageInfo: {
+//           recordCount: 0,
+//           pageSize: 1000,
+//           pageCount: 0,
+//           currentPage: 0,
+//         },
+//       };
+//       //console.log(req);
+//       await callApi(req)
+//         .then(async res => {
+//           dispatch(setStateWorkRepairSuccess(res.data.result));
+//           if (callback) callback(); // ✅ เรียก callback เมื่อเสร็จ
+//         })
+//         .catch(error => {
+//           // console.log(error);
+//           checkedToken(error, props);
+//           dispatch(setStateWorkRepairFailed());
+//         });
+//     } catch (error) {
+//       dispatch(setStateWorkRepairFailed());
+//     }
+//   };
+// };
+export const loadDataWitchPost = (searchParams = {}, props, callback) => {
   return async dispatch => {
     try {
       dispatch(setStateWorkRepairFetching());
+
+      const date = new Date();
+      const defaultStartDate = moment(date.setDate(date.getDate() - 3)).format('YYYYMMDD');
+
       const req = {
-        rwCode: '',
-        customerName: '',
-        telephone: '',
-        informDateStart: moment(inform_Date_Start).format('YYYYMMDD'),
-        informDateEnd: '',
+        rwCode: searchParams.IncidentNo || '',
+        customerName: searchParams.CustomerName || '',
+        telephone: searchParams.Telephone || '',
+        informDateStart: searchParams.FromDate || defaultStartDate,
+        informDateEnd: searchParams.ToDate || '',
         status: '',
         pageInfo: {
           recordCount: 0,
@@ -44,18 +88,13 @@ export const loadDataWitchPost = (props, callback) => {
           currentPage: 0,
         },
       };
-      //console.log(req);
-      await callApi(req)
-        .then(async res => {
-          dispatch(setStateWorkRepairSuccess(res.data.result));
-          if (callback) callback(); // ✅ เรียก callback เมื่อเสร็จ
-        })
-        .catch(error => {
-          // console.log(error);
-          checkedToken(error, props);
-          dispatch(setStateWorkRepairFailed());
-        });
+
+      const res = await callApi(req);
+      dispatch(setStateWorkRepairSuccess(res.data.result));
+      dispatch(setWorkRepairSearchParams(searchParams));
+      if (callback) callback();
     } catch (error) {
+      checkedToken(error, props);
       dispatch(setStateWorkRepairFailed());
     }
   };

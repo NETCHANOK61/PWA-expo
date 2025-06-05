@@ -23,6 +23,7 @@ import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 import * as receiveRepairFeedJsonAction from "../../actions/receiverepair/ReceiveRepairFeedJsonAction";
 import * as workRepairAction from "../../actions/workrepair/WorkRepairAction";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { setSearchParams } from "../../actions/repairfilter/RepairFilterAction";
 // import { registerTranslation } from 'react-native-paper-dates';
 // import { th } from 'date-fns/locale'; // Import the Thai locale from date-fns
 
@@ -33,6 +34,10 @@ const { width: viewportWidth, height: viewportHeight } =
 
 export default function ReceiveRepairSearchScreen(props) {
   const dispatch = useDispatch();
+  const searchParams = useSelector(
+    (state) => state.repairFilterReducer.searchParams
+  );
+  // console.log("ReceiveRepairSearchScreen", searchParams);
   // const repairFilterReducer = useSelector(state => state.repairFilterReducer);
   // const [isVisible, setIsVisible] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -49,15 +54,68 @@ export default function ReceiveRepairSearchScreen(props) {
   const [callFunPik, setCallFunPik] = useState({
     date_fun: () => {},
   });
+  const [initialized, setInitialized] = useState(false);
+
+  // const init = async () => {
+  //   await setNotiDate(dateNowThBack(3));
+  //   await setToDate(dateNowTh());
+  // };
 
   const init = async () => {
-    await setNotiDate(dateNowThBack(3));
-    await setToDate(dateNowTh());
+    const defaultNotiDate = dateNowThBack(3);
+    const defaultToDate = dateNowTh();
+
+    setNotiDate(defaultNotiDate);
+    setToDate(defaultToDate);
+
+    // Dispatch action เพื่อ set ค่า searchParams ใน Redux store
+    dispatch(
+      setSearchParams({
+        FromDate: defaultNotiDate,
+        ToDate: defaultToDate,
+        IncidentNo: "",
+        CustomerName: "",
+        Telephone: "",
+      })
+    );
   };
 
+  // init when no searchParams
   useEffect(() => {
-    init();
-  }, []);
+    if (!searchParams && !initialized) {
+      const defaultNotiDate = dateNowThBack(3);
+      const defaultToDate = dateNowTh();
+
+      setNotiDate(defaultNotiDate);
+      setToDate(defaultToDate);
+      setNoNoti("");
+      setName("");
+      setTel("");
+
+      dispatch(
+        setSearchParams({
+          FromDate: defaultNotiDate,
+          ToDate: defaultToDate,
+          IncidentNo: "",
+          CustomerName: "",
+          Telephone: "",
+        })
+      );
+      setInitialized(true);
+    }
+  }, [searchParams, initialized, dispatch]);
+
+  // update local states when searchParams changed
+  useEffect(() => {
+    if (searchParams && !initialized) {
+      setNotiDate(searchParams.FromDate || dateNowThBack(3));
+      setToDate(searchParams.ToDate || dateNowTh());
+      setNoNoti(searchParams.IncidentNo || "");
+      setName(searchParams.CustomerName || "");
+      setTel(searchParams.Telephone || "");
+      setInitialized(true);
+    }
+  }, [searchParams, initialized]);
 
   // const data = () => {
   //   const _ls = repairFilterReducer.dataObject.incidentSearchStatus.map(
@@ -199,6 +257,15 @@ export default function ReceiveRepairSearchScreen(props) {
 
   const search = () => {
     setVisibleLoading(true);
+    dispatch(
+      setSearchParams({
+        FromDate: notiDate,
+        ToDate: toDate,
+        IncidentNo: noNoti,
+        CustomerName: name,
+        Telephone: tel,
+      })
+    );
     // const start_test = "20/11/2567"
     // const end_test = "21/11/2567"
     if (props.route.name == "ReceiveRepairSearchScreen") {
