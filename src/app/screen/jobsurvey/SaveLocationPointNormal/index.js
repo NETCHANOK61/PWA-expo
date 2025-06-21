@@ -200,13 +200,13 @@ export default function Savelocation(props) {
           "ตกลง",
           "",
           () => {
-            // setVisibleAlert(false);
+            setVisibleAlert(false);
             // // ✅ เพิ่ม dispatch โหลดข้อมูลใหม่
             // dispatch(workRepairAction.loadDataWitchPost(props));
 
-            // setTimeout(() => {
-            //   props.navigation.goBack();
-            // }, 800);
+            setTimeout(() => {
+              props.navigation.goBack();
+            }, 800);
 
             dispatch(
               workRepairAction.loadDataWitchPost(props, () => {
@@ -306,7 +306,7 @@ export default function Savelocation(props) {
     const _mapSnap = await getValueMapSnap();
     const _viewShot = await capture();
 
-    // console.log("_mapSnap",_mapSnap)
+    console.log("_mapSnap",_mapSnap)
     dispatch(setStateRadioPipe(_mapSnap));
 
     dispatch(

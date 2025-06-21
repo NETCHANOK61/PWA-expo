@@ -89,7 +89,11 @@ export const removeValueMapSnap = async () => {
 };
 
 export const setCheckEmployee = async (isEmployee) => {
-  await AsyncStorage.setItem("employee", isEmployee);
+  if (isEmployee === null || isEmployee === undefined) {
+    await AsyncStorage.removeItem("employee"); // ลบ key ถ้าค่าไม่เหมาะสม
+  } else {
+    await AsyncStorage.setItem("employee", JSON.stringify(isEmployee));
+  }
 };
 
 export const getCheckEmployee = async () => {

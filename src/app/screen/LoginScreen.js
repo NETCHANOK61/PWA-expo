@@ -82,7 +82,6 @@ export default function LoginScreen(props) {
     const checkEmployee = await getCheckEmployee();
 
     if (remem != null) {
-      // console.log("📥 REMEM Loaded into State:", remem.username, remem.password);
       setUsername(remem.username);
       setPassword(remem.password);
       setTogleCheckEmployee(checkEmployee == "1");
@@ -423,7 +422,7 @@ export default function LoginScreen(props) {
           {`Copyright © PWA Field Service (${appVersion})`}
         </Text>
         <Text style={textsty.text_bold}>
-          {"Deverlop Update: 01/06/2568 09.00 AM"}
+          {"Deverlop Update: 19/06/2568 03:00 PM"}
         </Text>
       </View>
       <LoadingSpinner

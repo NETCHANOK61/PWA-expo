@@ -150,7 +150,6 @@ export default function WorkCarryRepairScreen(props) {
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
   const init = async () => {
-    // console.log(workRepairDetailReducer.dataArray.survey.pipe_id)
     // ✅ เคลียร์ state เดิมก่อนโหลดข้อมูลใหม่
     setDateTime({
       dateForm: "",
@@ -184,25 +183,21 @@ export default function WorkCarryRepairScreen(props) {
     // ✅ โหลดข้อมูลใหม่
     loadDataSetView();
     loadDataPinLocationPip();
+    // console.log(pickerdVal);
 
     let checkPermissions = await checkPermissionsAccept();
     if (!checkPermissions) await requestPermissionsAccept();
   };
 
   useEffect(() => {
-    if (props.data && props.data.rwId) {
+    if (props.data?.rwId) {
       init();
     }
-  }, [props.data.rwId, workRepairDetailReducer.dataArray.survey]);
-
-  // useEffect(() => {
-  //   if (workRepairDetailReducer?.dataArray?.survey) {
-  //     loadDataPinLocationPip(); // เรียกใหม่เมื่อค่าใน survey เปลี่ยน
-  //   }
-  // }, [workRepairDetailReducer.dataArray.survey]);
+  }, [props.data?.rwId]);
 
   const loadDataSetView = () => {
     const process = props.data?.process;
+    // console.log(process);
 
     if (!process) {
       setDateTime({
@@ -232,7 +227,7 @@ export default function WorkCarryRepairScreen(props) {
     });
 
     setBrokenAppearance(process.brokenAppearance || "");
-    toggleChecked(process.isNotGIS === "1");
+    // toggleChecked(process.isNotGIS === "1");
     loadData_saveSizeHole();
     loadData_savePickerVal();
     setVisibleLoading(false);
@@ -254,7 +249,8 @@ export default function WorkCarryRepairScreen(props) {
     // console.log("TypePipe:", props.data.process.piplineType);
     // console.log("Picker Value State:", pickerdVal);
     // console.log("props.data.process****:", props.data.process);
-
+    
+    sizeofpipe(props.data.process.piplineType);
     let leakWound_id = "99";
     if (props.data.process.leakWound_id) {
       leakWound_id = props.data.process.leakWound_id.toString();
@@ -271,18 +267,18 @@ export default function WorkCarryRepairScreen(props) {
     }));
 
     // console.log("loadData_savePickerVal:", props.data.process);
-    sizeofpipe(props.data.process.piplineType);
   };
 
   const loadDataPinLocationPip = () => {
     const survey = workRepairDetailReducer.dataArray?.survey || {};
     const savePoint = saveLocationPointNormalReducer.dataObj || {};
-    // console.log(survey.latitude);
-    // console.log(survey.longtitude);
+    // console.log(survey);
+    // console.log(savePoint);
 
     // เช็กค่าพิกัดว่ามีหรือไม่
-    const hasNoCoordinates = !survey.latitude || !survey.longtitude;
-    toggleCheckedLat(hasNoCoordinates);
+    const hasCoordinates =
+      !!survey?.latitude?.trim() && !!survey?.longtitude?.trim();
+    toggleCheckedLat(hasCoordinates);
 
     if (saveLocationPointNormalReducer.dataObj != null) {
       const { piplineType, piplineSize } = savePoint;
@@ -335,6 +331,7 @@ export default function WorkCarryRepairScreen(props) {
     }));
 
     if (nme === "tpyofpipes") {
+      // console.log("tpyofpipes");
       sizeofpipe(label);
       setPickerdVal((_state) => ({
         ..._state,
@@ -346,9 +343,9 @@ export default function WorkCarryRepairScreen(props) {
     if (nme == "processpipes") {
       if (label == 0) {
         if (
-          workRepairDetailReducer.dataArray.survey.pipe_id == "" ||
-          workRepairDetailReducer.dataArray.survey.piplineSize == "" ||
-          workRepairDetailReducer.dataArray.survey.piplineType == ""
+          workRepairDetailReducer.dataArray?.survey?.pipe_id == "" ||
+          workRepairDetailReducer.dataArray?.survey?.piplineSize == "" ||
+          workRepairDetailReducer.dataArray?.survey?.piplineType == ""
         ) {
           settingAlert("ALERT_WARNING_LOCATION");
         }
@@ -360,6 +357,7 @@ export default function WorkCarryRepairScreen(props) {
     }
 
     if (nme == "leakwound") {
+      // console.log("leakwound");
       let _filterLeakwound = props.getLeakwounds.filter(
         (x) => x.value === label
       );
@@ -385,39 +383,6 @@ export default function WorkCarryRepairScreen(props) {
     }));
   };
 
-  // const setSateDataParams = (key, value) => {
-  //   setDateTime((currentState) => ({ ...currentState, [key]: value }));
-  //   const obj = {
-  //     sts: "2",
-  //     dateForm:
-  //       key == "dateForm"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.dateForm,
-  //     dateTo:
-  //       key == "dateTo"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.dateTo,
-  //     dateTextTure:
-  //       key == "dateTextTure"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.dateTextTure,
-  //     timeFrom:
-  //       key == "timeFrom"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.timeFrom,
-  //     timeTo:
-  //       key == "timeTo"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.timeTo,
-  //     timeTextTrue:
-  //       key == "timeTextTrue"
-  //         ? value
-  //         : workCarrayRepairReducer.rememViewWorkCarray.timeTextTrue,
-  //   };
-
-  //   dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
-  // };
-
   const sizeofpipe = async (value) => {
     // console.log("sizeofpipe", value)
     let arrr1 = [];
@@ -433,29 +398,66 @@ export default function WorkCarryRepairScreen(props) {
         }
       });
     }
-    const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size }));
+    // const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size }));
+    const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size.toString() }));
     setArrPipeSize(pipeSizeOptions);
-    // console.log(pipeSizeOptions)
+    // console.log(pipeSizeOptions)​
   };
-
   const pickerProcess = () => {
     let pickerProcessArrr = [];
     // 29/05/2025
-    // console.log(workRepairDetailReducer.radioPipe);
-    if (workRepairDetailReducer.dataArray.survey.pipe_id) {
-      // console.log('workRepairDetailReducer.radioPipe == 1')
+    // console.log(workRepairDetailReducer.dataArray);
+    // console.log(
+    //   "pickerProcess",
+    //   workRepairDetailReducer.dataArray?.survey?.pipe_id
+    // );
+    const isNotGIS = workRepairDetailReducer.dataArray?.process?.isNotGIS;
+    // console.log(isNotGIS);
+    // console.log(pickerdVal.processpipes);
+    // console.log("pickerProcess", workRepairDetailReducer.dataArray?.process)
+    // #1
+    if (workRepairDetailReducer.dataArray?.survey?.pipe_id) {
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" }
       );
-    } else if (workRepairDetailReducer.dataArray.survey.pipe_id == "") {
-      // console.log('workRepairDetailReducer.radioPipe == 2')
+
+      if (isNotGIS !== "0" && isNotGIS !== "1") {
+        setPickerData("processpipes", "0");
+      } else {
+        setPickerData("processpipes", isNotGIS);
+      }
+    }
+    // #2
+    else if (
+      workRepairDetailReducer.dataArray?.survey?.pipe_id == "" &&
+      isNotGIS != undefined
+    ) {
+      // console.log("2", isNotGIS);
+      // isNotGIS ไม่มีใน obj, isNotGIS เป็นค่า "", isNotGIS = "0" / "1" / "2" / "3"
+      // if (isNotGIS) {
       pickerProcessArrr.push(
         { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
         { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
       );
-    } else {
-      // console.log('workRepairDetailReducer.radioPipe == 0')
+      if (isNotGIS != "2" || isNotGIS != "3") {
+        setPickerData("processpipes", "2");
+      } else {
+        setPickerData("processpipes", isNotGIS);
+      }
+      // }
+      // else {
+      //   pickerProcessArrr.push(
+      //     { label: "ตรงกับหน้างาน", value: "0" },
+      //     { label: "ไม่ตรงกับหน้างาน", value: "1" },
+      //     { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
+      //     { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
+      //   );
+      //   setPickerData("processpipes", "");
+      // }
+    }
+    // #3 default
+    else {
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" },
@@ -464,6 +466,8 @@ export default function WorkCarryRepairScreen(props) {
       );
     }
     setArrProcessGIS(pickerProcessArrr);
+    // console.log(workRepairDetailReducer.dataArray?.process?.isNotGIS)
+    // console.log("pickerProcess", workRepairDetailReducer.dataArray)
   };
 
   // End Picker
@@ -877,7 +881,8 @@ export default function WorkCarryRepairScreen(props) {
       HoleLength: holeLength,
       HoleDepth: holeDepth,
     };
-    //console.log("saveRepairWork : ", params);
+    // console.log("saveRepairWork : ", params);
+
     dispatch(workCarryRepairAction.saveRepairWork(params, settingAlert, props));
   };
 
@@ -1108,25 +1113,56 @@ export default function WorkCarryRepairScreen(props) {
     }
   };
 
+  // const disSizePipe = () => {
+  //   console.log(pickerdVal.processpipes)
+  //   let _dis = false;
+  //   if (pickerdVal.processpipes === "1") {
+  //     return _dis;
+  //   }
+  //   if (toggleCheckedSizePipe == true && checked == true) {
+  //     _dis = false;
+  //   } else {
+  //     _dis = true;
+  //   }
+  //   // console.log(_dis)
+  //   return _dis;
+  // };
+
+  // const disSizePipe = () => {
+  //   console.log(toggleCheckedSizePipe)
+  //   console.log(checked)
+  //   let _dis = false;
+  //   if (pickerdVal.processpipes === "1") {
+  //     return _dis;
+  //   }
+  //   if (toggleCheckedSizePipe == true && checked == true) {
+  //     _dis = false;
+  //   } else {
+  //     _dis = true;
+  //   }
+  //   // console.log(_dis)
+  //   return _dis;
+  // };
+
+  // ปิด SizePipe ถ้าไม่มี Type หรือไม่มี option
   const disSizePipe = () => {
-    let _dis = false;
-    if (pickerdVal.processpipes === "1") {
-      return false;
-    }
-    if (toggleCheckedSizePipe == true && checked == true) {
-      _dis = false;
-    } else {
-      _dis = true;
-    }
-    // console.log("disSizePipe", _dis)
-    return _dis;
+    const noType = !pickerdVal.tpyofpipes;
+    const noSizeOptions = arrPipeSize.length === 0;
+    const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    return noType || noSizeOptions || isNotMatchGIS;
+  };
+
+  // ปิด TypePipe ถ้า GIS ยังไม่ได้เลือก
+  const disableTypePipe = () => {
+    const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    return isNotMatchGIS;
   };
 
   const disProcesspipes = () => {
     let _dis = false;
     if (
-      workRepairDetailReducer.dataArray.survey.latitude == "" &&
-      workRepairDetailReducer.dataArray.survey.latitude == ""
+      workRepairDetailReducer.dataArray?.survey?.latitude == "" &&
+      workRepairDetailReducer.dataArray?.survey?.latitude == ""
     ) {
       _dis = true;
     } else {
@@ -1520,11 +1556,11 @@ export default function WorkCarryRepairScreen(props) {
                     <Text style={[textsty.text_request]}>*</Text>
                   </HStack>
                   <Dropdown
-                    disable={!checked}
+                    disable={disableTypePipe()}
                     style={[
                       styles.dropdown,
                       tpyofpipesisFocus && { borderColor: "#2c689e" },
-                      !checked && styles.disabledDropdown,
+                      disableTypePipe() && styles.disabledDropdown,
                     ]}
                     placeholderStyle={textsty.text_normal_regular}
                     selectedTextStyle={textsty.text_normal_regular}
@@ -1605,7 +1641,7 @@ export default function WorkCarryRepairScreen(props) {
                           สถานะลงจุดซ่อม (GIS)
                         </Text>
                         <Text style={[textsty.text_request]}>*</Text>
-                        {checkedLat ? (
+                        {!checkedLat ? (
                           <Text style={textsty.text_normal_bold}>
                             กรุณาลงจุดซ่อม
                           </Text>
@@ -1615,11 +1651,11 @@ export default function WorkCarryRepairScreen(props) {
                   </View>
                   <View style={{ flexDirection: "column" }}>
                     <Dropdown
-                      disable={checkedLat}
+                      disable={!checkedLat}
                       style={[
                         styles.dropdown,
                         processGISisFocus && { borderColor: "#2c689e" },
-                        checkedLat && styles.disabledDropdown,
+                        !checkedLat && styles.disabledDropdown,
                       ]}
                       placeholderStyle={textsty.text_normal_regular}
                       selectedTextStyle={textsty.text_normal_regular}
@@ -1642,7 +1678,7 @@ export default function WorkCarryRepairScreen(props) {
                         setProcessGISisFocus(false);
                       }}
                       renderLeftIcon={() =>
-                        pickerdVal.processpipes !== "" && (
+                        pickerdVal.processpipes != "" && (
                           <AntDesign
                             style={styles.icon}
                             color="green"

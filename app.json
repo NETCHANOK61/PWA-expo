@@ -2,7 +2,7 @@
   "expo": {
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.45",
+    "version": "1.0.48",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
@@ -27,7 +27,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 67,
+      "versionCode": 71,
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION"

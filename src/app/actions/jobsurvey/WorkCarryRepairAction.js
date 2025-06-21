@@ -64,6 +64,7 @@ export const rememViewWorkCarryRepair = obj => {
 };
 
 export const loadPiker = (brokenAppearanceText) => {
+  // console.log("loadPiker", brokenAppearanceText)
   return async dispatch => {
     try {
       Promise.all([
@@ -90,6 +91,7 @@ export const loadPiker = (brokenAppearanceText) => {
             getRequestCategorySubject,
             getLeakWounds
           };
+          // console.log(data_list.dataEmployees)
           dispatch(setStateListPiker(data_list));
         },
       );

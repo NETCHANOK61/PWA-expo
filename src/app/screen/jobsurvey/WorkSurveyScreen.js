@@ -33,7 +33,6 @@ export default function WorkSurveyScreen(props) {
     files4: { files: [], count: 0 },
     files5: { files: [], count: 0 },
   };
-
   useEffect(() => {
     if (isFocused) {
       getInitial();
@@ -122,10 +121,11 @@ export default function WorkSurveyScreen(props) {
   );
 
   function renderPhotoButton(key, label, fileGroup) {
+    const isCompleted = fileGroup?.count >= 3;
     return (
       <TouchableOpacity
         style={{
-          backgroundColor: '#999',
+          backgroundColor: isCompleted ? 'green' : '#999',
           borderRadius: 5,
           width: '49%',
           alignItems: 'center',

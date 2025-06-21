@@ -139,6 +139,11 @@ export default function ReceiveRepairSearchScreen(props) {
     return [day, month, year].join("/");
   };
 
+  const parseDateFromString = (str) => {
+    const [day, month, year] = str.split("/").map(Number);
+    return new Date(year - 543, month - 1, day); // ปีพุทธเป็นค.ศ.
+  };
+
   const onDismissSingle_noti = React.useCallback(() => {
     setOpenNoti(false);
   }, [setOpenNoti]);
@@ -165,25 +170,27 @@ export default function ReceiveRepairSearchScreen(props) {
     [(setOpenTo, setDate)]
   );
 
-  const DatePicker_Noti = ({ con, dis }) => {
+  const DatePicker_Noti = ({ con, dis, initialDate }) => {
     return (
       <DateTimePickerModal
         isVisible={openNoti}
         mode="date"
         onConfirm={con}
         onCancel={dis}
+        date={initialDate}
         locale="th_TH"
       />
     );
   };
 
-  const DatePicker_to = ({ con, dis }) => {
+  const DatePicker_to = ({ con, dis, initialDate }) => {
     return (
       <DateTimePickerModal
         isVisible={openTo}
         mode="date"
         onConfirm={con}
         onCancel={dis}
+        date={initialDate}
         locale="th_TH"
       />
     );
@@ -350,6 +357,7 @@ export default function ReceiveRepairSearchScreen(props) {
                       <DatePicker_Noti
                         con={onConfirmSingle_noti}
                         dis={onDismissSingle_noti}
+                        initialDate={parseDateFromString(notiDate)}
                       />
                     )}
                   </View>

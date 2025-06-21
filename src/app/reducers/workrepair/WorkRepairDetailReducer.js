@@ -4,13 +4,13 @@ import {
   ACTION_GETREPAIRWORKBYID_FAILED,
   ACTION_TEST_LOCATION,
   ACTION_RADIO_PIPE,
-} from '../../Constants';
+} from "../../Constants";
 const initialState = {
-  dataArray: null,
+  dataArray: { survey: {} },
   isError: false,
-  no: '',
-  location: '',
-  radioPipe: '0',
+  no: "",
+  location: "",
+  radioPipe: "0",
 };
 
 export default (state = initialState, { type, payload }) => {

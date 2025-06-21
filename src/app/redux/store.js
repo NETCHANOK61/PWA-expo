@@ -1,7 +1,6 @@
 // redux/store.js
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 
-// ตัวอย่าง Reducer
 const initialState = {
   count: 0,
 };
@@ -17,11 +16,16 @@ const counterReducer = (state = initialState, action) => {
   }
 };
 
-// สร้าง store
+const isDev = process.env.NODE_ENV === 'development';
+
 const store = configureStore({
   reducer: {
     counter: counterReducer,
   },
+  middleware: getDefaultMiddleware({
+    immutableCheck: false,     // ปิดทั้งสองตัวนี้
+    serializableCheck: false,
+  }),
 });
 
 export default store;

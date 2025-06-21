@@ -26,14 +26,14 @@ export default function MainTabScreen({ props, navigation }) {
   const [index, setIndex] = React.useState(0);
 
   const init = () => {
-    // let brokenAppearanceText = "";
-    // if (workRepairDetailReducer.dataArray.process != null) {
-    //   brokenAppearanceText =
-    //     workRepairDetailReducer.dataArray.process.brokenAppearance;
-    // }
-    // dispatch(workCarryRepairAction.loadPiker(brokenAppearanceText));
-    // reMemViewWorkCarryRepair();
-    // return () => {};
+    let brokenAppearanceText = "";
+    if (workRepairDetailReducer.dataArray.process != null) {
+      brokenAppearanceText =
+        workRepairDetailReducer.dataArray.process.brokenAppearance;
+    }
+    dispatch(workCarryRepairAction.loadPiker(brokenAppearanceText));
+    reMemViewWorkCarryRepair();
+    return () => {};
   };
   useEffect(() => {
     init();
@@ -58,6 +58,7 @@ export default function MainTabScreen({ props, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      setIndex(0);
       if (route.params?.job_code) {
         setJobCode(route.params.job_code);
         navigation.setOptions({

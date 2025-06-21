@@ -73,16 +73,23 @@ export default function WorkRepairScreen(props) {
   //   console.log("WorkRepairScreen");
   // }, [reduxSearchParams]); // 💥 สำคัญ! ต้องใส่ reduxSearchParams
 
-  useEffect(() => {
-    const unsubscribe = props.navigation.addListener("focus", () => {
-      init();
-      dispatch(
-        SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
-      );
-    });
+  // useEffect(() => {
+  //   const unsubscribe = props.navigation.addListener("focus", () => {
+  //     init();
+  //     dispatch(
+  //       SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //     );
+  //   });
 
-    return unsubscribe;
-  }, []);
+  //   return unsubscribe;
+  // }, []);
+
+  useEffect(() => {
+    init();
+    dispatch(
+      SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+    );
+  }, [reduxSearchParams]);
 
   // const init = async () => {
   //   const profileUserData = await getProfile();

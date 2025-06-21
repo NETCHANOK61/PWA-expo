@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Linking,
   Platform,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
 } from "react-native";
 import { Input } from "react-native-elements";
 import { useSelector, useDispatch } from "react-redux";
@@ -58,13 +58,13 @@ export default function WorkRepairTebScreen(props) {
       setVisible(true);
     } else {
       if (
-        props.data.incidents[0].caseLatitude == "" &&
-        props.data.incidents[0].caseLongtitude == ""
+        props?.data?.incidents?.[0]?.caseLatitude == "" &&
+        props?.data?.incidents?.[0]?.caseLongtitude == ""
       ) {
         setVisible(true);
       } else {
         props.navigation.navigate("location", {
-          viewData: props.data.incidents[0],
+          viewData: props?.data?.incidents?.[0],
           ww_code: profile.ww_code,
         });
       }
@@ -83,7 +83,10 @@ export default function WorkRepairTebScreen(props) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
-      <ScrollView style={{ backgroundColor: "#FFFFFF" }} nestedScrollEnabled={true}>
+      <ScrollView
+        style={{ backgroundColor: "#FFFFFF" }}
+        nestedScrollEnabled={true}
+      >
         {props.data != null ? (
           <View style={workRepairDetailStyle.section}>
             <View style={{ flex: 1, flexDirection: "column", marginTop: 10 }}>
@@ -134,9 +137,15 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].customerName == null
+                          {/* {props.data.incidents[0].customerName == null
                             ? "-"
-                            : props.data.incidents[0].customerName}
+                            : props.data.incidents[0].customerName} */}
+                          {props?.data &&
+                          props?.data?.incidents &&
+                          props?.data?.incidents?.[0] &&
+                          props?.data?.incidents?.[0]?.customerName
+                            ? props?.data?.incidents?.[0]?.customerName
+                            : "-"}
                         </Text>
                       </View>
                     </View>
@@ -154,7 +163,7 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].custCode}
+                          {props?.data?.incidents?.[0]?.custCode ?? "-"}
                         </Text>
                       </View>
                     </View>
@@ -180,9 +189,9 @@ export default function WorkRepairTebScreen(props) {
                     >
                       <View style={{ flex: 2, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].custAddress == null
+                          {props?.data?.incidents?.[0]?.custAddress == null
                             ? "-"
-                            : props.data.incidents[0].custAddress}
+                            : props?.data?.incidents?.[0]?.custAddress}
                         </Text>
                       </View>
                     </View>
@@ -208,10 +217,10 @@ export default function WorkRepairTebScreen(props) {
                         <TouchableOpacity
                           style={{ flexDirection: "row" }}
                           onPress={() => {
-                            callPhone(props.data.incidents[0].telephone);
+                            callPhone(props?.data?.incidents?.[0]?.telephone);
                           }}
                         >
-                          {props.data.incidents[0].telephone != "" ? (
+                          {props?.data?.incidents?.[0]?.telephone != "" ? (
                             <View style={{ flexDirection: "row" }}>
                               <Text
                                 style={[
@@ -222,7 +231,7 @@ export default function WorkRepairTebScreen(props) {
                                   },
                                 ]}
                               >
-                                {props.data.incidents[0].telephone}
+                                {props?.data?.incidents?.[0]?.telephone}
                               </Text>
                               <MaterialIcons name="call" size={20} />
                             </View>
@@ -255,7 +264,7 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].informChannelID_Name}
+                          {props?.data?.incidents?.[0]?.informChannelID_Name}
                         </Text>
                       </View>
                     </View>
@@ -312,7 +321,7 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].pwaIncidentNo}
+                          {props?.data?.incidents?.[0]?.pwaIncidentNo}
                         </Text>
                       </View>
                     </View>
@@ -330,7 +339,7 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].receivedCaseDateText}
+                          {props?.data?.incidents?.[0]?.receivedCaseDateText}
                         </Text>
                       </View>
                     </View>
@@ -348,7 +357,7 @@ export default function WorkRepairTebScreen(props) {
                       </View>
                       <View style={{ flex: 3, alignSelf: "stretch" }}>
                         <Text style={textsty.text_normal_regular}>
-                          {props.data.incidents[0].requestType}
+                          {props?.data?.incidents?.[0]?.requestType}
                         </Text>
                       </View>
                     </View>
@@ -379,9 +388,9 @@ export default function WorkRepairTebScreen(props) {
                             { color: "red" },
                           ]}
                         >
-                          {props.data.incidents[0].requestCategorySubject == ""
+                          {props?.data?.incidents?.[0]?.requestCategorySubject == ""
                             ? "-"
-                            : props.data.incidents[0].requestCategorySubject}
+                            : props?.data?.incidents?.[0]?.requestCategorySubject}
                         </Text>
                       </View>
                     </View>
@@ -413,9 +422,9 @@ export default function WorkRepairTebScreen(props) {
                             { color: "red" },
                           ]}
                         >
-                          {props.data.incidents[0].caseDetail == ""
+                          {props?.data?.incidents?.[0]?.caseDetail == ""
                             ? "-"
-                            : props.data.incidents[0].caseDetail}
+                            : props?.data?.incidents?.[0]?.caseDetail}
                         </Text>
                       </View>
                     </View>
@@ -457,7 +466,7 @@ export default function WorkRepairTebScreen(props) {
                   >
                     <View style={{ flex: 2, alignSelf: "stretch" }}>
                       <Text style={textsty.text_normal_regular}>
-                        {props.data.incidents[0].pwsIncidentAddress}
+                        {props?.data?.incidents?.[0]?.pwsIncidentAddress}
                       </Text>
                     </View>
                   </View>
@@ -474,7 +483,7 @@ export default function WorkRepairTebScreen(props) {
                     </View>
                     <View style={{ flex: 2, alignSelf: "stretch" }}>
                       <Text style={textsty.text_normal_regular}>
-                        {props.data.incidents[0].pwaInformReceiver_Name}
+                        {props?.data?.incidents?.[0]?.pwaInformReceiver_Name}
                       </Text>
                     </View>
                   </View>

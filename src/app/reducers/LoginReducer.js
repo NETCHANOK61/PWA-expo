@@ -1,4 +1,4 @@
-import { ACTION_LOGIN, ACTION_FAILED } from "../Constants";
+import { ACTION_LOGIN, ACTION_FAILED, ACTION_LOGOUT } from "../Constants";
 
 const initialState = {
   dataObject: {},
@@ -11,6 +11,8 @@ export default (state = initialState, { type, payload }) => {
       return { ...state, dataObject: payload, dataError: false };
     case ACTION_FAILED:
       return { ...state, dataObject: {}, dataError: true };
+    case ACTION_LOGOUT:
+      return initialState;
     default:
       return state;
   }
