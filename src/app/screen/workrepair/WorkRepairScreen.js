@@ -57,32 +57,70 @@ export default function WorkRepairScreen(props) {
     };
   };
 
+  // useEffect(() => {
+  //   // const unsubscribe = props.navigation.addListener("focus", () => {
+  //   //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
+  //   //   dispatch(
+  //   //     SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //   //   );
+  //   // });
+
+  //   // return unsubscribe;
+  //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
+  //   dispatch(
+  //     SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //   );
+  //   console.log("WorkRepairScreen");
+  // }, [reduxSearchParams]); // 💥 สำคัญ! ต้องใส่ reduxSearchParams
+
   useEffect(() => {
-    // const unsubscribe = props.navigation.addListener("focus", () => {
-    //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
-    //   dispatch(
-    //     SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
-    //   );
-    // });
+    const unsubscribe = props.navigation.addListener("focus", () => {
+      init();
+      dispatch(
+        SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+      );
+    });
 
-    // return unsubscribe;
-    init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
-    dispatch(
-      SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
-    );
-  }, [reduxSearchParams]); // 💥 สำคัญ! ต้องใส่ reduxSearchParams
+    return unsubscribe;
+  }, []);
 
+  // const init = async () => {
+  //   const profileUserData = await getProfile();
+  //   dispatch(setStateToLogin(profileUserData));
+  //   await dispatch(workCarryRepairAction.loadPiker());
+
+  //   const searchParamsToUse = reduxSearchParams || createDefaultSearchParams();
+
+  //   await dispatch(
+  //     workRepairAction.loadDataWitchPost(searchParamsToUse, props)
+  //   );
+  //   setIsLoadding(false);
+
+  //   const unsubscribe = navigation.addListener("focus", () => {
+  //     dispatch(
+  //       SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //     );
+  //   });
+  //   setIsCheckData(false);
+  //   return () => {
+  //     unsubscribe;
+  //   };
+  // };
   const init = async () => {
+    if (isLoadding) return;
+    setIsLoadding(true);
+
     const profileUserData = await getProfile();
     dispatch(setStateToLogin(profileUserData));
     await dispatch(workCarryRepairAction.loadPiker());
 
     const searchParamsToUse = reduxSearchParams || createDefaultSearchParams();
-
     await dispatch(
       workRepairAction.loadDataWitchPost(searchParamsToUse, props)
     );
+
     setIsLoadding(false);
+    setIsCheckData(false);
   };
 
   const formatDate = (date) => {
