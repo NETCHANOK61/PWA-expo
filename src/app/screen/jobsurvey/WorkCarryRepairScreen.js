@@ -713,7 +713,6 @@ export default function WorkCarryRepairScreen(props) {
         break;
 
       case "ALERT_INSERT_SUCCESS":
-        //console.log("TEST_______");
         setStateAlert(
           1,
           true,

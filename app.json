@@ -2,7 +2,7 @@
   "expo": {
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "1.0.48",
+    "version": "2.0.5",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pwa.smart1662.ios",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos for service reporting.",
         "NSLocationWhenInUseUsageDescription": "This app uses your location to tag service locations.",

@@ -35,9 +35,18 @@ export default function MainTabScreen({ props, navigation }) {
     reMemViewWorkCarryRepair();
     return () => {};
   };
+
   useEffect(() => {
     init();
   }, []);
+
+  useEffect(() => {
+    if (workRepairDetailReducer.dataArray?.rwId) {
+      setIndex(0);
+      // ✅ บังคับให้ Tab ซ่อมโหลดใหม่
+      setJobCode(workRepairDetailReducer.dataArray.rwId); // ถ้าคุณใช้ state นี้เป็น props
+    }
+  }, [workRepairDetailReducer.dataArray]);
 
   // useFocusEffect(
   //   useCallback(() => {
@@ -56,25 +65,25 @@ export default function MainTabScreen({ props, navigation }) {
   //   }, [route.params?.job_code])
   // );
 
-  useFocusEffect(
-    useCallback(() => {
-      setIndex(0);
-      if (route.params?.job_code) {
-        setJobCode(route.params.job_code);
-        navigation.setOptions({
-          title: route.params.job_code,
-          headerTitleAlign: "center",
-          headerTitleStyle: {
-            fontFamily: "Prompt-Bold",
-            fontSize: 18,
-            color: "#2c689e",
-          },
-        });
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setIndex(0);
+  //     if (route.params?.job_code) {
+  //       setJobCode(route.params.job_code);
+  //       navigation.setOptions({
+  //         title: route.params.job_code,
+  //         headerTitleAlign: "center",
+  //         headerTitleStyle: {
+  //           fontFamily: "Prompt-Bold",
+  //           fontSize: 18,
+  //           color: "#2c689e",
+  //         },
+  //       });
 
-        reMemViewWorkCarryRepair(); // ✅ เพิ่มตรงนี้
-      }
-    }, [route.params?.job_code])
-  );
+  //       reMemViewWorkCarryRepair(); // ✅ เพิ่มตรงนี้
+  //     }
+  //   }, [route.params?.job_code])
+  // );
 
   const reMemViewWorkCarryRepair = () => {
     if (workRepairDetailReducer.dataArray.process != null) {
