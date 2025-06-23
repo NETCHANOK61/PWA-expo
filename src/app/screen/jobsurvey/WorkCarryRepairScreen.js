@@ -149,8 +149,48 @@ export default function WorkCarryRepairScreen(props) {
   const [visibleLoading, setVisibleLoading] = useState(false);
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
+  // const init = async () => {
+  //   // ✅ เคลียร์ state เดิมก่อนโหลดข้อมูลใหม่
+  //   setDateTime({
+  //     dateForm: "",
+  //     dateTo: "",
+  //     dateTextTure: "",
+  //     timeFrom: "",
+  //     timeTo: "",
+  //     timeTextTrue: "",
+  //   });
+
+  //   setPickerdVal({
+  //     empoyees: "",
+  //     serfaces: "",
+  //     tpyofpipes: "",
+  //     sizeofpipes: "",
+  //     processpipes: "",
+  //     leakwound: "",
+  //     leakwound_s: "",
+  //   });
+
+  //   setBrokenAppearance("");
+  //   setHoleDepth("");
+  //   setHoleLength("");
+  //   setHoleWidth("");
+  //   setArrPipeSize([]);
+  //   setArrProcessGIS([]);
+  //   toggleChecked(false);
+  //   toggleCheckedLat(false);
+  //   setToggleCheckedSizePipe(false);
+
+  //   // ✅ โหลดข้อมูลใหม่
+  //   loadDataSetView();
+  //   loadDataPinLocationPip();
+  //   // console.log(pickerdVal);
+
+  //   let checkPermissions = await checkPermissionsAccept();
+  //   if (!checkPermissions) await requestPermissionsAccept();
+  // };
+
   const init = async () => {
-    // ✅ เคลียร์ state เดิมก่อนโหลดข้อมูลใหม่
+    // ✅ เคลียร์ค่าเดิม
     setDateTime({
       dateForm: "",
       dateTo: "",
@@ -180,10 +220,31 @@ export default function WorkCarryRepairScreen(props) {
     toggleCheckedLat(false);
     setToggleCheckedSizePipe(false);
 
-    // ✅ โหลดข้อมูลใหม่
+    // ✅ ดึงค่าจาก props.data ใหม่ (หลัง save)
+    if (props.data?.process) {
+      setBrokenAppearance(props.data.process.brokenAppearance || "");
+      setHoleDepth(props.data.process.holeDepth || "");
+      setHoleLength(props.data.process.holeLength || "");
+      setHoleWidth(props.data.process.holeWidth || "");
+
+      // ตัวอย่างเติม picker
+      setPickerdVal((prev) => ({
+        ...prev,
+        empoyees: props.data.process.empoyeeId || "",
+        serfaces: props.data.process.surfaceId || "",
+        tpyofpipes: props.data.process.pipeTypeId || "",
+        leakwound: props.data.process.woundId || "",
+        // etc.
+      }));
+
+      // ✅ ตั้ง toggle ต่าง ๆ
+      toggleChecked(!!props.data.process.isNotGIS);
+      toggleCheckedLat(!!props.data.process.useLatlong);
+    }
+
+    // ✅ โหลด dropdown ต่าง ๆ
     loadDataSetView();
     loadDataPinLocationPip();
-    // console.log(pickerdVal);
 
     let checkPermissions = await checkPermissionsAccept();
     if (!checkPermissions) await requestPermissionsAccept();
@@ -249,7 +310,7 @@ export default function WorkCarryRepairScreen(props) {
     // console.log("TypePipe:", props.data.process.piplineType);
     // console.log("Picker Value State:", pickerdVal);
     // console.log("props.data.process****:", props.data.process);
-    
+
     sizeofpipe(props.data.process.piplineType);
     let leakWound_id = "99";
     if (props.data.process.leakWound_id) {
@@ -399,14 +460,17 @@ export default function WorkCarryRepairScreen(props) {
       });
     }
     // const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size }));
-    const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size.toString() }));
+    const pipeSizeOptions = arrr1.map((size) => ({
+      label: size,
+      value: size.toString(),
+    }));
     setArrPipeSize(pipeSizeOptions);
     // console.log(pipeSizeOptions)​
   };
   const pickerProcess = () => {
     let pickerProcessArrr = [];
     // 29/05/2025
-    // console.log(workRepairDetailReducer.dataArray);
+    console.log(workRepairDetailReducer.dataArray);
     // console.log(
     //   "pickerProcess",
     //   workRepairDetailReducer.dataArray?.survey?.pipe_id
@@ -417,6 +481,7 @@ export default function WorkCarryRepairScreen(props) {
     // console.log("pickerProcess", workRepairDetailReducer.dataArray?.process)
     // #1
     if (workRepairDetailReducer.dataArray?.survey?.pipe_id) {
+      console.log("if", 1)
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" }
@@ -431,9 +496,9 @@ export default function WorkCarryRepairScreen(props) {
     // #2
     else if (
       workRepairDetailReducer.dataArray?.survey?.pipe_id == "" &&
-      isNotGIS != undefined
+      (isNotGIS != undefined && isNotGIS != "")
     ) {
-      // console.log("2", isNotGIS);
+      console.log("2", isNotGIS);
       // isNotGIS ไม่มีใน obj, isNotGIS เป็นค่า "", isNotGIS = "0" / "1" / "2" / "3"
       // if (isNotGIS) {
       pickerProcessArrr.push(
