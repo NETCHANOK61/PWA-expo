@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   TextInput,
   View,
@@ -8,63 +8,66 @@ import {
   ScrollView,
   Image,
   BackHandler,
-} from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
-import { useSelector, useDispatch } from 'react-redux';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+} from "react-native";
+import { useIsFocused } from "@react-navigation/native";
+import { useSelector, useDispatch } from "react-redux";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 // import ImagePicker from 'react-native-image-crop-picker';
 // import ImageResizer from 'react-native-image-resizer';
 // import RNFS from 'react-native-fs';
-import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as FileSystem from "expo-file-system";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
-import Awesome from '../../components/awesomealert/Awesome';
-import * as workTakePhotoAction from '../../actions/jobsurvey/WorkTakePhotoAction';
-import * as cameraAction from '../../actions/camera/CameraAction';
-import Styles from '../../styles/WorkTakePhotoStyle';
-import textStyle from '../../styles/TextStyle';
-import ModalImage from '../../components/modal-image/index';
-import LoadingSpinner from '../../components/loading-spinner/loading-spinner';
+const { width: viewportWidth, height: viewportHeight } =
+  Dimensions.get("window");
+import Awesome from "../../components/awesomealert/Awesome";
+import * as workTakePhotoAction from "../../actions/jobsurvey/WorkTakePhotoAction";
+import * as cameraAction from "../../actions/camera/CameraAction";
+import Styles from "../../styles/WorkTakePhotoStyle";
+import textStyle from "../../styles/TextStyle";
+import ModalImage from "../../components/modal-image/index";
+import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 
 export default function WorkTakePhotoScreen(props) {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
-  const cameraReducer = useSelector(state => state.cameraReducer);
-  const workSurveyReducer = useSelector(state => state.workSurveyReducer);
-  const workTakePhotoReducer = useSelector(state => state.workTakePhotoReducer);
+  const cameraReducer = useSelector((state) => state.cameraReducer);
+  const workSurveyReducer = useSelector((state) => state.workSurveyReducer);
+  const workTakePhotoReducer = useSelector(
+    (state) => state.workTakePhotoReducer
+  );
   const workRepairDetailReducer = useSelector(
-    state => state.workRepairDetailReducer,
+    (state) => state.workRepairDetailReducer
   );
 
   const [visibleLoading, setVisibleLoading] = useState(false);
-  const [loadingText, setLoadingText] = useState('กำลังบันทึก');
-  const [imagePreview, setImagePreview] = useState('');
-  const [image_1, setImage_1] = useState('');
-  const [image_2, setImage_2] = useState('');
-  const [image_3, setImage_3] = useState('');
-  const [imageApi_1, setImageApi_1] = useState('');
-  const [imageApi_2, setImageApi_2] = useState('');
-  const [imageApi_3, setImageApi_3] = useState('');
+  const [loadingText, setLoadingText] = useState("กำลังบันทึก");
+  const [imagePreview, setImagePreview] = useState("");
+  const [image_1, setImage_1] = useState("");
+  const [image_2, setImage_2] = useState("");
+  const [image_3, setImage_3] = useState("");
+  const [imageApi_1, setImageApi_1] = useState("");
+  const [imageApi_2, setImageApi_2] = useState("");
+  const [imageApi_3, setImageApi_3] = useState("");
 
-  const [comment_1, setComment_1] = useState('');
-  const [comment_2, setComment_2] = useState('');
-  const [comment_3, setComment_3] = useState('');
+  const [comment_1, setComment_1] = useState("");
+  const [comment_2, setComment_2] = useState("");
+  const [comment_3, setComment_3] = useState("");
   const [imageSeq, setImageSeq] = useState(0);
   const [visableAlert, setVisibleAlert] = useState(false);
   const [customAlert, setCustomAlert] = useState({
     titleIcon: 0,
     showConfirmButton: false,
     showCancelButton: false,
-    textBody: '',
-    confirmText: '',
-    cancelText: '',
-    onConfirmPress: () => { },
-    onCancelPress: () => { },
+    textBody: "",
+    confirmText: "",
+    cancelText: "",
+    onConfirmPress: () => {},
+    onCancelPress: () => {},
   });
   const [visiblePreviewImg, setVisiblePreviewImg] = useState(false);
 
@@ -74,13 +77,13 @@ export default function WorkTakePhotoScreen(props) {
       await getInitialImage();
       await setStateCommentBegin();
     }
-  }
+  };
 
   useEffect(() => {
-    init(isFocused)
+    init(isFocused);
     const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
+      "hardwareBackPress",
+      backAction
     );
     return () => {
       dispatch(cameraAction.setPhotoReset());
@@ -110,18 +113,19 @@ export default function WorkTakePhotoScreen(props) {
   const setNavigationOption = () => {
     props.navigation.setOptions({
       title: setTitle(workSurveyReducer.target),
-      headerTintColor: '#2c689e',
-      headerTitleAlign: 'center',
+      headerTintColor: "#2c689e",
+      headerTitleAlign: "center",
       headerTitleStyle: {
-        fontFamily: 'Prompt-Bold',
+        fontFamily: "Prompt-Bold",
         fontSize: 0.02 * viewportHeight,
       },
-      headerBackTitle: ' ',
+      headerBackTitle: " ",
       headerLeft: () => (
         <TouchableOpacity
           activeOpacity={0.1}
           onPress={() => handleCheckChange()}
-          style={{ padding: 10 }}>
+          style={{ padding: 10 }}
+        >
           <Ionicons
             name="chevron-back-outline"
             size={30}
@@ -137,33 +141,33 @@ export default function WorkTakePhotoScreen(props) {
   };
 
   const handleCheckChange = () => {
-    if (cameraReducer.photoseq != '0') {
-      settingAlert('ALERT_BACK_STEP');
+    if (cameraReducer.photoseq != "0") {
+      settingAlert("ALERT_BACK_STEP");
     } else {
       props.navigation.goBack();
     }
   };
-  const setTitle = key => {
-    let _title = '';
+  const setTitle = (key) => {
+    let _title = "";
     switch (key) {
-      case '1':
-        _title = 'ก่อนซ่อม';
+      case "1":
+        _title = "ก่อนซ่อม";
         break;
 
-      case '2':
-        _title = 'เตรียมการก่อนซ่อม';
+      case "2":
+        _title = "เตรียมการก่อนซ่อม";
         break;
 
-      case '3':
-        _title = 'ระหว่างซ่อม ';
+      case "3":
+        _title = "ระหว่างซ่อม ";
         break;
 
-      case '4':
-        _title = 'เก็บงานคืนซ่อม';
+      case "4":
+        _title = "เก็บงานคืนซ่อม";
         break;
 
-      case '5':
-        _title = 'หลังซ่อม';
+      case "5":
+        _title = "หลังซ่อม";
         break;
 
       default:
@@ -210,64 +214,75 @@ export default function WorkTakePhotoScreen(props) {
       //     break;
       // }
       props.route.params.image.map((value, index) => {
-        if (value.orderNo == '1') {
+        if (value.orderNo == "1") {
           setImageApi_1(value);
         }
-        if (value.orderNo == '2') {
+        if (value.orderNo == "2") {
           setImageApi_2(value);
         }
-        if (value.orderNo == '3') {
+        if (value.orderNo == "3") {
           setImageApi_3(value);
         }
       });
     }
   };
 
-  const handleClickTaskCamera = imageSeq => {
-    props.navigation.navigate('camera', {
+  const handleClickTaskCamera = (imageSeq) => {
+    props.navigation.navigate("camera", {
       ImageSEQ: imageSeq,
-      ImageType: 'LD',
+      ImageType: "LD",
       comment_1: comment_1,
       comment_2: comment_2,
       comment_3: comment_3,
     });
   };
-
+  // 7/7/2025
   const selectPhotoTapped = async (imageSeq) => {
     try {
-      // Request permission to access media library
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission is required to access the gallery.');
+      // ✅ ขอสิทธิ์เข้าถึงรูปภาพในอุปกรณ์
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("กรุณาอนุญาตเข้าถึงคลังภาพเพื่อใช้งานฟีเจอร์นี้");
         return;
       }
-  
-      // Open image picker
+
+      // ✅ เปิดหน้าจอเลือกรูปจากคลังภาพ
       const result = await ImagePicker.launchImageLibraryAsync({
-        base64: true,
-        exif: true,
+        base64: false, // ❌ ไม่ต้องขอ base64 ตรงนี้
+        quality: 1,
+        allowsEditing: false,
       });
-  
+
+      // ✅ ถ้าไม่ยกเลิกการเลือกรูป
       if (!result.canceled) {
-        const image = result.assets[0];
-  
-        // Resize image
-        const mode = 'contain';
-        const resizedImage = await ImageManipulator.manipulateAsync(
+        const image = result.assets[0]; // รูปที่เลือก
+
+        // ✅ ย่อรูปเพื่อให้เบาและเร็ว (ลดขนาดภาพ)
+        const resized = await ImageManipulator.manipulateAsync(
           image.uri,
-          [{ resize: { width: 720, height: 960 } }],
+          [{ resize: { width: 720, height: 960 } }], // ปรับขนาดเล็กลง
           {
-            compress: 1,
+            compress: 0.8, // บีบอัดไฟล์
             format: ImageManipulator.SaveFormat.JPEG,
           }
         );
-  
-        // Convert resized image to base64
-        const base64Image = await FileSystem.readAsStringAsync(resizedImage.uri, {
+
+        // ✅ คัดลอกภาพไปเก็บไว้ในพื้นที่ของแอป (iOS จำเป็นต้องทำ)
+        const fileName = resized.uri.split("/").pop(); // เอาชื่อไฟล์ออกจาก path
+        const localUri = FileSystem.documentDirectory + fileName;
+
+        await FileSystem.copyAsync({
+          from: resized.uri,
+          to: localUri,
+        });
+
+        // ✅ อ่านไฟล์ที่ย่อแล้วมาเป็น base64
+        const base64Image = await FileSystem.readAsStringAsync(localUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-  
-        // Set the image in the state based on imageSeq
+
+        // ✅ เซ็ต base64 เข้ารูปตามลำดับที่เลือก
         switch (imageSeq) {
           case 1:
             setImage_1(base64Image);
@@ -282,11 +297,65 @@ export default function WorkTakePhotoScreen(props) {
             break;
         }
       }
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("❌ เกิดข้อผิดพลาดใน selectPhotoTapped:", err);
+      alert("ไม่สามารถเลือกรูปภาพได้ กรุณาลองใหม่");
     }
   };
 
+  // const selectPhotoTapped = async (imageSeq) => {
+  //   try {
+  //     // Request permission to access media library
+  //     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       alert('Permission is required to access the gallery.');
+  //       return;
+  //     }
+
+  //     // Open image picker
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       base64: true,
+  //       exif: true,
+  //     });
+
+  //     if (!result.canceled) {
+  //       const image = result.assets[0];
+
+  //       // Resize image
+  //       const mode = 'contain';
+  //       const resizedImage = await ImageManipulator.manipulateAsync(
+  //         image.uri,
+  //         [{ resize: { width: 720, height: 960 } }],
+  //         {
+  //           compress: 1,
+  //           format: ImageManipulator.SaveFormat.JPEG,
+  //         }
+  //       );
+
+  //       // Convert resized image to base64
+  //       const base64Image = await FileSystem.readAsStringAsync(resizedImage.uri, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+
+  //       // Set the image in the state based on imageSeq
+  //       switch (imageSeq) {
+  //         case 1:
+  //           setImage_1(base64Image);
+  //           break;
+  //         case 2:
+  //           setImage_2(base64Image);
+  //           break;
+  //         case 3:
+  //           setImage_3(base64Image);
+  //           break;
+  //         default:
+  //           break;
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
   const setStateAlert = (
     _titleIcon,
     _showConfirmButton,
@@ -295,9 +364,9 @@ export default function WorkTakePhotoScreen(props) {
     _confirmText,
     _cancelText,
     _onConfirmPress,
-    _onCancelPress,
+    _onCancelPress
   ) => {
-    setCustomAlert(state => ({
+    setCustomAlert((state) => ({
       ...state,
       titleIcon: _titleIcon,
       showConfirmButton: _showConfirmButton,
@@ -310,17 +379,17 @@ export default function WorkTakePhotoScreen(props) {
     }));
   };
 
-  const settingAlert = key => {
+  const settingAlert = (key) => {
     setVisibleLoading(false);
-    if (key == 'ALERT_CONFIRM_SAVE_IMAGE') {
+    if (key == "ALERT_CONFIRM_SAVE_IMAGE") {
       setVisibleAlert(true);
       setStateAlert(
         2,
         true,
         true,
-        'คุณต้องการบันทึกรูปภาพหรือไม่',
-        'ตกลง',
-        'ยกเลิก',
+        "คุณต้องการบันทึกรูปภาพหรือไม่",
+        "ตกลง",
+        "ยกเลิก",
         () => {
           setVisibleAlert(false);
           setTimeout(() => {
@@ -330,76 +399,81 @@ export default function WorkTakePhotoScreen(props) {
         },
         () => {
           setVisibleAlert(false);
-        },
+        }
       );
     } else {
       setTimeout(() => {
         switch (key) {
-          case 'ALERT_LOAD_REPAIR_WORK':
+          case "ALERT_LOAD_REPAIR_WORK":
             props.navigation.goBack();
             break;
-          case 'ALERT_INSERT_SUCCESS':
+          case "ALERT_INSERT_SUCCESS":
             setVisibleAlert(true);
             setStateAlert(
               1,
               true,
               false,
-              'บันทึกรูปภาพเรียบร้อย',
-              'ตกลง',
-              '',
+              "บันทึกรูปภาพเรียบร้อย",
+              "ตกลง",
+              "",
               () => {
                 setVisibleAlert(false);
                 setTimeout(() => {
-                  setLoadingText('กำลังโหลด');
+                  setLoadingText("กำลังโหลด");
                   setVisibleLoading(true);
-                  dispatch(workTakePhotoAction.loadDataGetRepairWorkByID(props, settingAlert));
+                  dispatch(
+                    workTakePhotoAction.loadDataGetRepairWorkByID(
+                      props,
+                      settingAlert
+                    )
+                  );
                 }, 500);
               },
-              () => { },
+              () => {}
             );
             break;
 
-          case 'ALERT_INSERT_FAILED':
+          case "ALERT_INSERT_FAILED":
             setVisibleAlert(true);
             setStateAlert(
               4,
               true,
               false,
-              'ไม่สามารถบันทึกรูปภาพได้',
-              'ตกลง',
-              '',
+              "ไม่สามารถบันทึกรูปภาพได้",
+              "ตกลง",
+              "",
               () => {
                 setVisibleAlert(false);
               },
-              () => { },
+              () => {}
             );
             break;
 
-          case 'ALERT_PREVIEW_IMAGE_FAILED':
+          case "ALERT_PREVIEW_IMAGE_FAILED":
             setVisibleAlert(true);
             setStateAlert(
               3,
               true,
               false,
-              'ไม่สามารถแสดงรูปภาพได้',
-              'ตกลง',
-              '',
+              "ไม่สามารถแสดงรูปภาพได้",
+              "ตกลง",
+              "",
               () => {
                 setVisibleAlert(false);
               },
-              () => { },
+              () => {}
             );
             break;
 
-          case 'ALERT_BACK_STEP':
+          case "ALERT_BACK_STEP":
             setVisibleAlert(true);
             setStateAlert(
               2,
               true,
               true,
               'กด "ตกลง" เพื่อทำการบันทึกข้อมูลต่อ หรือ กด "ยกเลิก" สำหรับยกเลิกการรายการ',
-              'ตกลง',
-              'ยกเลิก',
+              "ตกลง",
+              "ยกเลิก",
               () => {
                 setVisibleAlert(false);
               },
@@ -408,7 +482,7 @@ export default function WorkTakePhotoScreen(props) {
                 setTimeout(() => {
                   props.navigation.goBack();
                 }, 800);
-              },
+              }
             );
             break;
           default:
@@ -421,30 +495,30 @@ export default function WorkTakePhotoScreen(props) {
   const handleSaveImages = () => {
     const file = [];
 
-    if ((image_1 != '' && typeof image_1 === 'string') || comment_1 != '') {
+    if ((image_1 != "" && typeof image_1 === "string") || comment_1 != "") {
       file.push({
-        FileName: 'image1.jpg',
+        FileName: "image1.jpg",
         No: props.route.params.no,
-        OrderNo: '1',
+        OrderNo: "1",
         Comment: comment_1,
         Base64File: image_1,
       });
     }
-    if ((image_2 != '' && typeof image_2 === 'string') || comment_2 != '') {
+    if ((image_2 != "" && typeof image_2 === "string") || comment_2 != "") {
       file.push({
-        FileName: 'image2.jpg',
+        FileName: "image2.jpg",
         No: props.route.params.no,
-        OrderNo: '2',
+        OrderNo: "2",
         Comment: comment_2,
         Base64File: image_2,
       });
     }
 
-    if ((image_3 != '' && typeof image_3 === 'string') || comment_3 != '') {
+    if ((image_3 != "" && typeof image_3 === "string") || comment_3 != "") {
       file.push({
-        FileName: 'image3.jpg',
+        FileName: "image3.jpg",
         No: props.route.params.no,
-        OrderNo: '3',
+        OrderNo: "3",
         Comment: comment_3,
         Base64File: image_3,
       });
@@ -453,9 +527,9 @@ export default function WorkTakePhotoScreen(props) {
     dispatch(workTakePhotoAction.savePhoto(props, file, settingAlert));
   };
 
-  const openPreviewImage = image => {
-    if (image == '') {
-      settingAlert('ALERT_PREVIEW_IMAGE_FAILED');
+  const openPreviewImage = (image) => {
+    if (image == "") {
+      settingAlert("ALERT_PREVIEW_IMAGE_FAILED");
     } else {
       setImagePreview(image);
       setVisiblePreviewImg(true);
@@ -467,57 +541,61 @@ export default function WorkTakePhotoScreen(props) {
   };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'white' }}>
+    <View style={{ flex: 1, alignItems: "center", backgroundColor: "white" }}>
       <ScrollView>
         <View style={Styles.section}>
           <View style={Styles.step}>
             <Text style={textStyle.text_normal_bold_color_blue}>รูปที่ 1</Text>
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: "row" }}>
               <TouchableOpacity
                 onPress={() => {
                   openPreviewImage(
-                    imageApi_1 != ''
+                    imageApi_1 != ""
                       ? props.route.params.image[0].htmlFile
-                      : image_1 != ''
-                        ? 'data:image/jpeg;base64,' + image_1
-                        : '',
+                      : image_1 != ""
+                      ? "data:image/jpeg;base64," + image_1
+                      : ""
                   );
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="image"
-                  style={[{ fontSize: 0.06 * viewportWidth, color: '#2c689e' }]}
+                  style={[{ fontSize: 0.06 * viewportWidth, color: "#2c689e" }]}
                 />
               </TouchableOpacity>
               <View style={{ paddingHorizontal: 5 }} />
               <TouchableOpacity
                 onPress={() => {
                   selectPhotoTapped(1);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="download"
-                  style={[{ fontSize: 0.05 * viewportWidth, color: '#f44336' }]}
+                  style={[{ fontSize: 0.05 * viewportWidth, color: "#f44336" }]}
                 />
               </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.row}>
-            {image_1 == '' && imageApi_1 == '' ? (
+            {image_1 == "" && imageApi_1 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(1);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="camera"
-                  style={[{ fontSize: 0.15 * viewportWidth, color: '#FFF' }]}
+                  style={[{ fontSize: 0.15 * viewportWidth, color: "#FFF" }]}
                 />
               </TouchableOpacity>
-            ) : imageApi_1 != '' && image_1 == '' ? (
+            ) : imageApi_1 != "" && image_1 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(1);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
                   source={{ uri: props.route.params.image[0].htmlFile }}
@@ -528,74 +606,79 @@ export default function WorkTakePhotoScreen(props) {
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(1);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
-                  source={{ uri: 'data:image/jpeg;base64,' + image_1 }}
+                  source={{ uri: "data:image/jpeg;base64," + image_1 }}
                 />
               </TouchableOpacity>
             )}
             <TextInput
-              style={[Styles.textInputMultiImage, { color: 'black' }]}
+              style={[Styles.textInputMultiImage, { color: "black" }]}
               multiline={true}
               numberOfLines={5}
-              textAlignVertical={'top'}
-              placeholder={'รายละเอียดรูปภาพ'}
-              placeholderTextColor={'#ddd'}
+              textAlignVertical={"top"}
+              placeholder={"รายละเอียดรูปภาพ"}
+              placeholderTextColor={"#ddd"}
               value={comment_1}
-              onChangeText={text => {
+              onChangeText={(text) => {
                 setComment_1(text);
               }}
             />
           </View>
           <View style={Styles.step}>
             <Text style={textStyle.text_normal_bold_color_blue}>รูปที่ 2</Text>
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: "row" }}>
               <TouchableOpacity
                 onPress={() => {
                   openPreviewImage(
-                    imageApi_2 != ''
+                    imageApi_2 != ""
                       ? props.route.params.image[1].htmlFile
-                      : image_2 != ''
-                        ? 'data:image/jpeg;base64,' + image_2
-                        : '',
+                      : image_2 != ""
+                      ? "data:image/jpeg;base64," + image_2
+                      : ""
                   );
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="image"
-                  style={[{ fontSize: 0.06 * viewportWidth, color: '#2c689e' }]}
+                  style={[{ fontSize: 0.06 * viewportWidth, color: "#2c689e" }]}
                 />
               </TouchableOpacity>
               <View style={{ paddingHorizontal: 5 }} />
               <TouchableOpacity
                 onPress={() => {
                   selectPhotoTapped(2);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="download"
-                  style={[{ fontSize: 0.05 * viewportWidth, color: '#f44336' }]}
+                  style={[{ fontSize: 0.05 * viewportWidth, color: "#f44336" }]}
                 />
               </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.row}>
-            {image_2 == '' && imageApi_2 == '' ? (
+            {image_2 == "" && imageApi_2 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(2);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="camera"
-                  style={[{ fontSize: 0.15 * viewportWidth, color: '#FFF' }]}
+                  style={[{ fontSize: 0.15 * viewportWidth, color: "#FFF" }]}
                 />
               </TouchableOpacity>
-            ) : imageApi_2 != '' && image_2 == '' ? (
+            ) : imageApi_2 != "" && image_2 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(2);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
                   source={{ uri: props.route.params.image[1].htmlFile }}
@@ -606,22 +689,23 @@ export default function WorkTakePhotoScreen(props) {
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(2);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
-                  source={{ uri: 'data:image/jpeg;base64,' + image_2 }}
+                  source={{ uri: "data:image/jpeg;base64," + image_2 }}
                 />
               </TouchableOpacity>
             )}
             <TextInput
-              style={[Styles.textInputMultiImage, { color: 'black' }]}
+              style={[Styles.textInputMultiImage, { color: "black" }]}
               multiline={true}
               numberOfLines={5}
-              textAlignVertical={'top'}
-              placeholder={'รายละเอียดรูปภาพ'}
-              placeholderTextColor={'#ddd'}
+              textAlignVertical={"top"}
+              placeholder={"รายละเอียดรูปภาพ"}
+              placeholderTextColor={"#ddd"}
               value={comment_2}
-              onChangeText={text => {
+              onChangeText={(text) => {
                 setComment_2(text);
               }}
             />
@@ -629,52 +713,56 @@ export default function WorkTakePhotoScreen(props) {
 
           <View style={Styles.step}>
             <Text style={textStyle.text_normal_bold_color_blue}>รูปที่ 3</Text>
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: "row" }}>
               <TouchableOpacity
                 onPress={() => {
                   openPreviewImage(
-                    imageApi_3 != ''
+                    imageApi_3 != ""
                       ? props.route.params.image[2].htmlFile
-                      : image_3 != ''
-                        ? 'data:image/jpeg;base64,' + image_3
-                        : '',
+                      : image_3 != ""
+                      ? "data:image/jpeg;base64," + image_3
+                      : ""
                   );
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="image"
-                  style={[{ fontSize: 0.06 * viewportWidth, color: '#2c689e' }]}
+                  style={[{ fontSize: 0.06 * viewportWidth, color: "#2c689e" }]}
                 />
               </TouchableOpacity>
               <View style={{ paddingHorizontal: 5 }} />
               <TouchableOpacity
                 onPress={() => {
                   selectPhotoTapped(3);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="download"
-                  style={[{ fontSize: 0.05 * viewportWidth, color: '#f44336' }]}
+                  style={[{ fontSize: 0.05 * viewportWidth, color: "#f44336" }]}
                 />
               </TouchableOpacity>
             </View>
           </View>
           <View style={Styles.row}>
-            {image_3 == '' && imageApi_3 == '' ? (
+            {image_3 == "" && imageApi_3 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(3);
-                }}>
+                }}
+              >
                 <FontAwesome5
                   name="camera"
-                  style={[{ fontSize: 0.15 * viewportWidth, color: '#FFF' }]}
+                  style={[{ fontSize: 0.15 * viewportWidth, color: "#FFF" }]}
                 />
               </TouchableOpacity>
-            ) : imageApi_3 != '' && image_3 == '' ? (
+            ) : imageApi_3 != "" && image_3 == "" ? (
               <TouchableOpacity
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(3);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
                   source={{ uri: props.route.params.image[2].htmlFile }}
@@ -685,22 +773,23 @@ export default function WorkTakePhotoScreen(props) {
                 style={Styles.itemboxImage}
                 onPress={() => {
                   handleClickTaskCamera(3);
-                }}>
+                }}
+              >
                 <Image
                   style={Styles.itemboxImage2}
-                  source={{ uri: 'data:image/jpeg;base64,' + image_3 }}
+                  source={{ uri: "data:image/jpeg;base64," + image_3 }}
                 />
               </TouchableOpacity>
             )}
             <TextInput
-              style={[Styles.textInputMultiImage, { color: 'black' }]}
+              style={[Styles.textInputMultiImage, { color: "black" }]}
               multiline={true}
               numberOfLines={5}
-              textAlignVertical={'top'}
-              placeholder={'รายละเอียดรูปภาพ'}
-              placeholderTextColor={'#ddd'}
+              textAlignVertical={"top"}
+              placeholder={"รายละเอียดรูปภาพ"}
+              placeholderTextColor={"#ddd"}
               value={comment_3}
-              onChangeText={text => {
+              onChangeText={(text) => {
                 setComment_3(text);
               }}
             />
@@ -712,10 +801,11 @@ export default function WorkTakePhotoScreen(props) {
             transparent
             style={Styles.itemBtnActive}
             onPress={() => {
-              settingAlert('ALERT_CONFIRM_SAVE_IMAGE');
-            }}>
+              settingAlert("ALERT_CONFIRM_SAVE_IMAGE");
+            }}
+          >
             <MaterialIcons name="save" style={Styles.itemIcon} />
-            <Text style={[{ color: 'white' }, textStyle.text_normal_bold]}>
+            <Text style={[{ color: "white" }, textStyle.text_normal_bold]}>
               บันทึกรูปภาพ
             </Text>
           </TouchableOpacity>
@@ -724,8 +814,8 @@ export default function WorkTakePhotoScreen(props) {
       <LoadingSpinner
         visible={visibleLoading}
         textContent={loadingText}
-        animation={'fade'}
-        color={'#0000ff'}
+        animation={"fade"}
+        color={"#0000ff"}
       />
       <Awesome
         visible={visableAlert}

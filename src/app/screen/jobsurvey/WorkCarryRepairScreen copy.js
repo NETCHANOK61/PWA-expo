@@ -149,6 +149,46 @@ export default function WorkCarryRepairScreen(props) {
   const [visibleLoading, setVisibleLoading] = useState(false);
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
+  // const init = async () => {
+  //   // ✅ เคลียร์ state เดิมก่อนโหลดข้อมูลใหม่
+  //   setDateTime({
+  //     dateForm: "",
+  //     dateTo: "",
+  //     dateTextTure: "",
+  //     timeFrom: "",
+  //     timeTo: "",
+  //     timeTextTrue: "",
+  //   });
+
+  //   setPickerdVal({
+  //     empoyees: "",
+  //     serfaces: "",
+  //     tpyofpipes: "",
+  //     sizeofpipes: "",
+  //     processpipes: "",
+  //     leakwound: "",
+  //     leakwound_s: "",
+  //   });
+
+  //   setBrokenAppearance("");
+  //   setHoleDepth("");
+  //   setHoleLength("");
+  //   setHoleWidth("");
+  //   setArrPipeSize([]);
+  //   setArrProcessGIS([]);
+  //   toggleChecked(false);
+  //   toggleCheckedLat(false);
+  //   setToggleCheckedSizePipe(false);
+
+  //   // ✅ โหลดข้อมูลใหม่
+  //   loadDataSetView();
+  //   loadDataPinLocationPip();
+  //   // console.log(pickerdVal);
+
+  //   let checkPermissions = await checkPermissionsAccept();
+  //   if (!checkPermissions) await requestPermissionsAccept();
+  // };
+
   const init = async () => {
     // ✅ เคลียร์ค่าเดิม
     setDateTime({
@@ -442,6 +482,13 @@ export default function WorkCarryRepairScreen(props) {
 
   const pickerProcess = () => {
     let pickerProcessArrr = [];
+    // 29/05/2025
+    // console.log(workRepairDetailReducer.dataArray);
+    // console.log(
+    //   "pickerProcess",
+    //   workRepairDetailReducer.dataArray?.survey?.pipe_id
+    // );
+    // const isNotGIS = workRepairDetailReducer.dataArray?.process?.isNotGIS;
     const pipeId = workRepairDetailReducer.dataArray?.survey?.pipe_id ?? "";
     const isNotGIS = workRepairDetailReducer.dataArray?.process?.isNotGIS ?? "";
     const latitude = workRepairDetailReducer.dataArray?.survey?.latitude ?? "";
@@ -486,7 +533,67 @@ export default function WorkCarryRepairScreen(props) {
       );
     }
 
+    // console.log(isNotGIS);
+    // console.log(pickerdVal.processpipes);
+    // console.log("pickerProcess", workRepairDetailReducer.dataArray?.process)
+    // #1
+    // if (workRepairDetailReducer.dataArray?.survey?.pipe_id) {
+    //   console.log("if", 1);
+    //   pickerProcessArrr.push(
+    //     { label: "ตรงกับหน้างาน", value: "0" },
+    //     { label: "ไม่ตรงกับหน้างาน", value: "1" }
+    //   );
+
+    //   if (isNotGIS !== "0" && isNotGIS !== "1") {
+    //     setPickerData("processpipes", "0");
+    //   } else {
+    //     setPickerData("processpipes", isNotGIS);
+    //   }
+    // }
+    // #2
+    // else if (
+    //   (!workRepairDetailReducer.dataArray?.survey?.pipe_id ||
+    //     workRepairDetailReducer.dataArray?.survey?.pipe_id === "") &&
+    //   isNotGIS != undefined &&
+    //   isNotGIS != ""
+    // ) {
+    //   console.log("else if", 2);
+    //   // isNotGIS ไม่มีใน obj, isNotGIS เป็นค่า "", isNotGIS = "0" / "1" / "2" / "3"
+    //   // if (isNotGIS) {
+    //   pickerProcessArrr.push(
+    //     { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
+    //     { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
+    //   );
+    //   if (isNotGIS != "2" || isNotGIS != "3") {
+    //     setPickerData("processpipes", "2");
+    //   } else {
+    //     setPickerData("processpipes", isNotGIS);
+    //   }
+    // }
+    // else {
+    //   pickerProcessArrr.push(
+    //     { label: "ตรงกับหน้างาน", value: "0" },
+    //     { label: "ไม่ตรงกับหน้างาน", value: "1" },
+    //     { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
+    //     { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
+    //   );
+    //   setPickerData("processpipes", "");
+    // }
+    // }
+    // #3 default
+    // else {
+    //   console.log("else", 3);
+    //   pickerProcessArrr.push(
+    //     { label: "ตรงกับหน้างาน", value: "0" },
+    //     { label: "ไม่ตรงกับหน้างาน", value: "1" },
+    //     { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
+    //     { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
+    //   );
+    // }
+
     setArrProcessGIS(pickerProcessArrr);
+    // console.log(workRepairDetailReducer.dataArray?.process?.isNotGIS)
+    // console.log("pickerProcess", workRepairDetailReducer.dataArray)
   };
 
   // End Picker
@@ -1131,33 +1238,51 @@ export default function WorkCarryRepairScreen(props) {
     }
   };
 
-  // ปิด SizePipe ถ้าไม่มี Type หรือไม่มี option
-  const disSizePipe = () => {
-    const isGisMatch = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
-    const noType = !pickerdVal.tpyofpipes;
-    const noSizeOptions = arrPipeSize.length === 0;
-    return isGisMatch || noType || noSizeOptions;
-  };
+  // const disSizePipe = () => {
+  //   console.log(pickerdVal.processpipes)
+  //   let _dis = false;
+  //   if (pickerdVal.processpipes === "1") {
+  //     return _dis;
+  //   }
+  //   if (toggleCheckedSizePipe == true && checked == true) {
+  //     _dis = false;
+  //   } else {
+  //     _dis = true;
+  //   }
+  //   // console.log(_dis)
+  //   return _dis;
+  // };
 
   // const disSizePipe = () => {
-  //   const noType = !pickerdVal.tpyofpipes; // ยังไม่เลือกชนิดท่อ
-  //   const noSizeOptions = arrPipeSize.length === 0; // ไม่มีตัวเลือกขนาดท่อ
-  //   return noType || noSizeOptions; // ปิดก็ต่อเมื่อไม่มีชนิดท่อ หรือไม่มี options
+  //   console.log(toggleCheckedSizePipe)
+  //   console.log(checked)
+  //   let _dis = false;
+  //   if (pickerdVal.processpipes === "1") {
+  //     return _dis;
+  //   }
+  //   if (toggleCheckedSizePipe == true && checked == true) {
+  //     _dis = false;
+  //   } else {
+  //     _dis = true;
+  //   }
+  //   // console.log(_dis)
+  //   return _dis;
   // };
 
-  // ปิด TypePipe ถ้า GIS ยังไม่ได้เลือก
-  // const disableTypePipe = () => {
-  //   const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
-  //   return isNotMatchGIS;
-  // };
-  // const disableTypePipe = () => {
-  //   const allowedValues = ["0", "1", "2", "3"];
-  //   return !allowedValues.includes(pickerdVal.processpipes);
-  // };
-  const disableTypePipe = () => {
-    const isGisMatch = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
-    return isGisMatch;
+  // ปิด SizePipe ถ้าไม่มี Type หรือไม่มี option
+  const disSizePipe = () => {
+    const noType = !pickerdVal.tpyofpipes;
+    const noSizeOptions = arrPipeSize.length === 0;
+    const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    return noType || noSizeOptions || isNotMatchGIS;
   };
+
+  // ปิด TypePipe ถ้า GIS ยังไม่ได้เลือก
+  const disableTypePipe = () => {
+    const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    return isNotMatchGIS;
+  };
+
   const disProcesspipes = () => {
     let _dis = false;
     if (

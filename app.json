@@ -2,7 +2,7 @@
   "expo": {
     "name": "PWA Field Service",
     "slug": "pwa-field-service",
-    "version": "2.0.5",
+    "version": "1.0.48",
     "orientation": "portrait",
     "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
@@ -14,10 +14,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pwa.smart1662.ios",
-      "buildNumber": "4",
+      "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to take photos for service reporting.",
-        "NSLocationWhenInUseUsageDescription": "This app uses your location to tag service locations.",
+        "NSCameraUsageDescription": "แอปนี้ต้องการใช้กล้องเพื่อถ่ายภาพประกอบงาน",
+        "NSPhotoLibraryUsageDescription": "แอปนี้ต้องการเข้าถึงคลังภาพเพื่อเลือกรูปภาพ",
+        "NSPhotoLibraryAddUsageDescription": "แอปนี้ต้องการบันทึกรูปลงในคลังภาพ",
+        "NSLocationWhenInUseUsageDescription": "แอปนี้ใช้ตำแหน่งของคุณเพื่อระบุตำแหน่งหน้างาน",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -27,21 +29,16 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pwa.smart1662.android",
-      "versionCode": 71,
-      "permissions": [
-        "CAMERA",
-        "ACCESS_FINE_LOCATION"
-      ]
+      "versionCode": 72,
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
     },
     "web": {
       "favicon": "assets/os-icon/prd.png"
     },
-    "plugins": [
-      "expo-font"
-    ],
+    "plugins": ["expo-font"],
     "extra": {
       "eas": {
-        "projectId": "f01f2539-b4cc-43d1-9b50-7525c8c49ba7"
+        "projectId": "f8c8608b-0569-42c2-9dfb-7d4974c055d6"
       }
     }
   }
