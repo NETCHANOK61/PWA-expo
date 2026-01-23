@@ -1,17 +1,17 @@
 // const url = `https://smart1662.pwa.co.th`;
 // const url = `http://sitdev.dyndns.org:10000`;
 //Producation
-// const url = 'https://smart1662.pwa.co.th';
+const url = 'https://smart1662.pwa.co.th';
 
 //Test
-const url = 'https://smart1662-test.pwa.co.th';
+// const url = 'https://smart1662-test.pwa.co.th';
 
 export default {
   getToken: `${url}/smapilab/token`,
   // RecevieRepair
   getIncidents: `${url}/smapilab/api/v2/Incident/GetIncidents`,
   getIncidentByIds: `${url}/smapilab/api/v2/Incident/GetIncidentByIds`,
-  getBaseData: `${url}/smapilab/api/v2/Incident/GetBaseData`,
+  // getBaseData: `${url}/smapilab/api/v2/Incident/GetBaseData`,
   reject: `${url}/smapilab/api/v2/Incident/Reject`,
 
   // Repair work

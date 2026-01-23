@@ -100,6 +100,7 @@ export const loadPiker = (brokenAppearanceText) => {
 };
 
 export const getSizeOfPipes = key => {
+  console.log("getSizeOfPipes", key)
   return async dispatch => {
     try {
       await serviveFetch('GET', url.getSizeOfPipes + '/' + key).then(data => {

@@ -380,6 +380,7 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const sizeofpipe = async (value) => {
+    console.log("a", value)
     let arrr1 = [];
     if (value != "") {
       await getSizeOfPipes(value).then((data) => {

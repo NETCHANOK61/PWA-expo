@@ -18,6 +18,7 @@ import {
   HStack,
   Icon,
 } from "native-base";
+import DropDownPicker from "react-native-dropdown-picker";
 
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -51,11 +52,11 @@ import {
   checkPermissionsAccept,
   requestPermissionsAccept,
 } from "../../utils/permissionsDevice";
+import CustomDropDown from "../../components/dropdown-picker";
 
-const InputNormal = ({ hint, onChangeText, val, color, dis, typeOfInput }) => {
+const InputNormal = ({ hint, onChangeText, val, color, dis }) => {
   return (
     <TextInput
-      inputMode={typeOfInput}
       style={[
         WorkCarryRepairStyle.textinput,
         { borderColor: color, color: "black" },
@@ -70,7 +71,6 @@ const InputNormal = ({ hint, onChangeText, val, color, dis, typeOfInput }) => {
 };
 
 export default function WorkCarryRepairScreen(props) {
-  console.log(props.getLeakwounds)
   const dispatch = useDispatch();
 
   const workCarrayRepairReducer = useSelector(
@@ -103,7 +103,6 @@ export default function WorkCarryRepairScreen(props) {
   const [holeWidth, setHoleWidth] = useState("");
   const [arrPipeSize, setArrPipeSize] = useState([]);
   const [arrProcessGIS, setArrProcessGIS] = useState([]);
-
   // Begin New Picker DateTime
   const [show, setShow] = useState(false);
   const [customPickerdateTime, setCustomPickerdateTime] = useState({
@@ -128,7 +127,6 @@ export default function WorkCarryRepairScreen(props) {
     sizeofpipes: "",
     processpipes: "",
     leakwound: "",
-    leakwound_s: "",
   });
 
   const [customAlert, setCustomAlert] = useState({
@@ -142,6 +140,10 @@ export default function WorkCarryRepairScreen(props) {
     onCancelPress: () => {},
   });
 
+  // picker
+  const [empoyeesPicker, setEmpoyeesPicker] = useState(false); // ผู้ซ่อม
+  const [leakwoundPicker, setLeakwoundPicker] = useState(false); // ลักษณะการแตก
+  const [serfacesPicker, setSerfacesPicker] = useState(false); // ลักษณะพื้นผิว
   // spiner load
   const [visibleLoading, setVisibleLoading] = useState(false);
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
@@ -309,6 +311,7 @@ export default function WorkCarryRepairScreen(props) {
 
   // Start Picker
   const setPickerData = (nme, label) => {
+    console.log("setPickerData: ", label);
     setPickerdVal((_state) => ({
       ..._state,
       [nme]: label,
@@ -331,9 +334,6 @@ export default function WorkCarryRepairScreen(props) {
       } else {
         toggleChecked(true);
       }
-      // setPickerdVal(_state => ({
-      //   ..._state, tpyofpipes: '', sizeofpipes: ''
-      // }));
       setToggleCheckedSizePipe(false);
     }
 
@@ -341,19 +341,9 @@ export default function WorkCarryRepairScreen(props) {
       let _filterLeakwound = props.getLeakwounds.filter(
         (x) => x.value === label
       );
-      setPickerdVal((_state) => ({
-        ..._state,
-        leakwound_s: truncateText(_filterLeakwound[0].label, 20),
-      }));
+      console.log(_filterLeakwound[0].label);
       setBrokenAppearance(_filterLeakwound[0].label);
     }
-  };
-
-  const truncateText = (text, maxLength) => {
-    if (text && text.length > maxLength) {
-      return text.substring(0, maxLength) + "...";
-    }
-    return text;
   };
 
   const setSateDataParams = (key, value) => {
@@ -390,6 +380,7 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const sizeofpipe = async (value) => {
+    console.log("a", value)
     let arrr1 = [];
     if (value != "") {
       await getSizeOfPipes(value).then((data) => {
@@ -1150,8 +1141,93 @@ export default function WorkCarryRepairScreen(props) {
     return _dis;
   };
 
+  const data = [
+    {
+      title: 'ผู้ซ่อม',
+      component: (
+        <DropDownPicker
+          open={empoyeesPicker}
+          value={pickerdVal.empoyees}
+          items={props.empoyees.map((val) => ({
+            label: val.label,
+            value: val.value,
+          }))}
+          setOpen={setEmpoyeesPicker}
+          onSelectItem={(itemValue) => setPickerData('empoyees', itemValue.value)}
+          placeholder="เลือกผู้ซ่อม"
+        />
+      ),
+    },
+    {
+      title: 'ลักษณะการแตก (รูปแบบแผล)',
+      component: (
+        <DropDownPicker
+          open={leakwoundPicker}
+          value={pickerdVal.leakwound}
+          items={props.getLeakwounds.map((val) => ({
+            label: val.label,
+            value: val.value,
+          }))}
+          setOpen={setLeakwoundPicker}
+          onSelectItem={(itemValue) => setPickerData('leakwound', itemValue.value)}
+          placeholder="เลือกลักษณะการแตก"
+        />
+      ),
+    },
+    {
+      title: 'ลักษณะพื้นผิว',
+      component: (
+        <DropDownPicker
+          open={serfacesPicker}
+          value={pickerdVal.serfaces}
+          items={props.getSerfaces.map((val) => ({
+            label: val.label,
+            value: val.value,
+          }))}
+          setOpen={setSerfacesPicker}
+          onSelectItem={(itemValue) => setPickerData('serfaces', itemValue.value)}
+          placeholder="เลือกลักษณะพื้นผิว"
+        />
+      ),
+    },
+    {
+      title: 'ขนาดหลุม',
+      component: (
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 2, marginRight: 5 }}>
+            <InputNormal
+              hint="กว้าง"
+              onChangeText={(text) => setHoleWidth(text)}
+              val={holeWidth}
+              color="#2c689e"
+            />
+          </View>
+          <View style={{ flex: 2, marginRight: 5 }}>
+            <InputNormal
+              hint="ยาว"
+              onChangeText={(text) => setHoleLength(text)}
+              val={holeLength}
+              color="#2c689e"
+            />
+          </View>
+          <View style={{ flex: 2, marginRight: 5 }}>
+            <InputNormal
+              hint="ลึก"
+              onChangeText={(text) => setHoleDepth(text)}
+              val={holeDepth}
+              color="#2c689e"
+            />
+          </View>
+        </View>
+      ),
+    },
+  ];
+
+  const getItemCount = () => data.length;
+  const getItem = (data, index) => data[index];
+
   return (
-    <ScrollView style={{ backgroundColor: "#FFFFFF" }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={{ flex: 1 }}>
         <NativeBaseProvider>
           <View
@@ -1183,7 +1259,13 @@ export default function WorkCarryRepairScreen(props) {
                 </View>
                 <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
                   <View style={{ flex: 1, marginRight: 5 }}>
-                    <TouchableOpacity onPress={() => setVisibleDateFrom(true)}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Platform.OS == "ios"
+                          ? setVisibleDateFrom(true)
+                          : showTimePiker(4)
+                      }
+                    >
                       <InputNormal
                         hint="วันที่"
                         val={dateTime.dateForm}
@@ -1209,7 +1291,9 @@ export default function WorkCarryRepairScreen(props) {
                   <View style={{ flex: 1 }}>
                     <TouchableOpacity
                       onPress={() => {
-                        setVisibleTimeFrom(true);
+                        Platform.OS == "ios"
+                          ? setVisibleTimeFrom(true)
+                          : showTimePiker(1);
                       }}
                     >
                       <InputNormal
@@ -1261,7 +1345,13 @@ export default function WorkCarryRepairScreen(props) {
                 </View>
                 <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
                   <View style={{ flex: 1, marginRight: 5 }}>
-                    <TouchableOpacity onPress={() => setVisibleDateTo(true)}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Platform.OS == "ios"
+                          ? setVisibleDateTo(true)
+                          : showTimePiker(5)
+                      }
+                    >
                       <InputNormal
                         hint="วันที่"
                         val={dateTime.dateTo}
@@ -1287,7 +1377,9 @@ export default function WorkCarryRepairScreen(props) {
                   <View style={{ flex: 1 }}>
                     <TouchableOpacity
                       onPress={() => {
-                        setVisibleTimeTo(true);
+                        Platform.OS == "ios"
+                          ? setVisibleTimeTo(true)
+                          : showTimePiker(2);
                       }}
                     >
                       <InputNormal
@@ -1340,7 +1432,11 @@ export default function WorkCarryRepairScreen(props) {
                 <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
                   <View style={{ flex: 1, marginRight: 5 }}>
                     <TouchableOpacity
-                      onPress={() => setVisibleDateTextTure(true)}
+                      onPress={() =>
+                        Platform.OS == "ios"
+                          ? setVisibleDateTextTure(true)
+                          : showTimePiker(6)
+                      }
                     >
                       <InputNormal
                         hint="วันที่"
@@ -1367,7 +1463,9 @@ export default function WorkCarryRepairScreen(props) {
                   <View style={{ flex: 1 }}>
                     <TouchableOpacity
                       onPress={() => {
-                        setVisibleTimeTextTure(true);
+                        Platform.OS == "ios"
+                          ? setVisibleTimeTextTure(true)
+                          : showTimePiker(3);
                       }}
                     >
                       <InputNormal
@@ -1408,50 +1506,22 @@ export default function WorkCarryRepairScreen(props) {
               >
                 <Text style={textsty.text_normal_bold}>ผู้ซ่อม</Text>
                 <VStack alignItems="center" space={4}>
-                  <Select
-                    key={"select1"}
-                    selectedValue={pickerdVal.empoyees}
-                    width="100%"
-                    boxSize={0.035 * viewportHeight}
-                    _ios={{ boxSize: 0.04 * viewportHeight }}
-                    _android={{ boxSize: 0.04 * viewportHeight }}
-                    paddingTop={0}
-                    paddingBottom={0}
-                    paddingLeft={2}
-                    borderColor="black"
-                    fontSize={0.02 * viewportHeight}
-                    fontFamily="Prompt-Regular"
-                    accessibilityLabel="เลือกผู้ซ่อม"
-                    placeholder="เลือกผู้ซ่อม"
-                    selectedVal={handleRepaireAccountId()}
-                    onValueChange={(itemValue) =>
-                      setPickerData("empoyees", itemValue)
-                    }
-                    _selectedItem={{
-                      bg: "#2c689e",
-                      endIcon: <CheckIcon size={4} />,
+                  <DropDownPicker
+                    open={empoyeesPicker}
+                    value={pickerdVal.empoyees}
+                    items={props.empoyees.map((val) => {
+                      return {
+                        label: val.label,
+                        value: val.value,
+                      };
+                    })}
+                    setOpen={setEmpoyeesPicker}
+                    onSelectItem={(itemValue) => {
+                      setPickerData("empoyees", itemValue.value);
                     }}
-                  >
-                    {props.empoyees.map((val, index) => (
-                      <Select.Item
-                        key={index}
-                        label={val.label}
-                        value={val.value}
-                      />
-                    ))}
-                  </Select>
+                    placeholder="เลือกผู้ซ่อม"
+                  />
                 </VStack>
-
-                {/* <View style={WorkCarryRepairStyle.space} />
-                <Text style={[textsty.text_normal_bold]}>
-                  ลักษณะการแตกของท่อจริง
-                </Text>
-                <InputNormal
-                  hint="ลักษณะการเเตก-ท่อรั่ว"
-                  onChangeText={text => setBrokenAppearance(text)}
-                  val={brokenAppearance}
-                  color="black"
-                /> */}
                 <HStack alignItems="center" mt={1}>
                   <Text style={[textsty.text_normal_bold]}>
                     ลักษณะการแตก (รูปแบบแผล)
@@ -1459,51 +1529,26 @@ export default function WorkCarryRepairScreen(props) {
                   <Text style={[textsty.text_request]}>*</Text>
                 </HStack>
                 <VStack alignItems="center" space={4}>
-                  <Select
-                    key={"select2"}
-                    // selectedValue={pickerdVal.leakwound}
-                    selectedValue={
-                      (() => {
-                        const selectedItem = props.getLeakwounds.find(
-                          (item) => item.value === pickerdVal.leakwound
-                        );
-                        const label = selectedItem ? selectedItem.label : "";
-                        return label.length > 10 ? label.substring(0, 10) + "..." : label;
-                      })()
-                    }
-                    width="100%"
-                    // boxSize={0.035 * viewportHeight}
-                    _ios={{ boxSize: 0.04 * viewportHeight }}
-                    _android={{ boxSize: 0.04 * viewportHeight }}
-                    paddingTop={0}
-                    paddingBottom={0}
-                    paddingLeft={2}
-                    borderColor="black"
-                    fontSize={0.02 * viewportHeight}
-                    fontFamily="Prompt-Regular"
-                    accessibilityLabel="เลือกลักษณะการแตก"
-                    placeholder="เลือกลักษณะการแตก"
-                    onValueChange={(itemValue) =>
-                      setPickerData("leakwound", itemValue)
-                    }
-                    _selectedItem={{
-                      bg: "#2c689e",
-                      endIcon: <CheckIcon size={4} />,
+                  <DropDownPicker
+                    open={leakwoundPicker}
+                    value={pickerdVal.leakwound}
+                    items={props.getLeakwounds.map((val) => {
+                      return {
+                        label: val.label,
+                        value: val.value,
+                      };
+                    })}
+                    setOpen={setLeakwoundPicker}
+                    onSelectItem={(itemValue) => {
+                      setPickerData("leakwound", itemValue.value);
                     }}
-                  >
-                    {props.getLeakwounds.map((val, index) => (
-                      <Select.Item
-                        key={index}
-                        label={val.label}
-                        value={val.value}
-                      />
-                    ))}
-                  </Select>
+                    placeholder="เลือกลักษณะการแตก"
+                  />
                 </VStack>
 
                 <View style={WorkCarryRepairStyle.space} />
                 <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 1, marginRight: 5 }}>
+                  <View style={{ flex: 2, marginRight: 5 }}>
                     <HStack alignItems="center">
                       <Text style={textsty.text_normal_bold}>ชนิดของท่อ</Text>
                       <Text style={[textsty.text_request]}>*</Text>
@@ -1518,74 +1563,10 @@ export default function WorkCarryRepairScreen(props) {
                 </View>
 
                 <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <VStack alignItems="center" space={4}>
-                      <Select
-                        key={"select3"}
-                        selectedValue={pickerdVal.tpyofpipes}
-                        width="100%"
-                        _ios={{ boxSize: 0.04 * viewportHeight }}
-                        _android={{ boxSize: 0.04 * viewportHeight }}
-                        paddingTop={0}
-                        paddingBottom={0}
-                        paddingLeft={2}
-                        borderColor="black"
-                        fontSize={0.02 * viewportHeight}
-                        fontFamily="Prompt-Regular"
-                        accessibilityLabel="เลือกชนิดของท่อ"
-                        placeholder="เลือกชนิดของท่อ"
-                        selectedVal={handleTypePipe()}
-                        isDisabled={!checked}
-                        onValueChange={(itemValue) =>
-                          setPickerData("tpyofpipes", itemValue)
-                        }
-                        _selectedItem={{
-                          bg: "#2c689e",
-                          endIcon: <CheckIcon size={4} />,
-                        }}
-                      >
-                        {props.getTypeOfPipes.map((val, index) => (
-                          <Select.Item
-                            key={index}
-                            label={val.label}
-                            value={val.value}
-                          />
-                        ))}
-                      </Select>
-                    </VStack>
+                  <View style={{ flex: 2, marginRight: 5 }}>
                   </View>
 
                   <View style={{ flex: 1 }}>
-                    <VStack alignItems="center" space={4}>
-                      <Select
-                        key={"select4"}
-                        selectedValue={pickerdVal.sizeofpipes}
-                        width="100%"
-                        _ios={{ boxSize: 0.04 * viewportHeight }}
-                        _android={{ boxSize: 0.04 * viewportHeight }}
-                        paddingTop={0}
-                        paddingBottom={0}
-                        paddingLeft={2}
-                        borderColor="black"
-                        fontSize={0.02 * viewportHeight}
-                        fontFamily="Prompt-Regular"
-                        accessibilityLabel="เลือกขนาด"
-                        placeholder="เลือกขนาด"
-                        selectedVal={handleSizePipe()}
-                        isDisabled={disSizePipe()}
-                        onValueChange={(itemValue) =>
-                          setPickerData("sizeofpipes", itemValue)
-                        }
-                        _selectedItem={{
-                          bg: "#2c689e",
-                          endIcon: <CheckIcon size={4} />,
-                        }}
-                      >
-                        {arrPipeSize.map((val, index) => (
-                          <Select.Item key={index} label={val} value={val} />
-                        ))}
-                      </Select>
-                    </VStack>
                   </View>
                 </View>
                 <View style={WorkCarryRepairStyle.space} />
@@ -1605,111 +1586,35 @@ export default function WorkCarryRepairScreen(props) {
                   </View>
                 </View>
                 <View style={{ flexDirection: "column" }}>
-                  <VStack alignItems="center" space={4}>
-                    <Select
-                      key={"select5"}
-                      selectedValue={pickerdVal.processpipes}
-                      width="100%"
-                      _ios={{ boxSize: 0.04 * viewportHeight }}
-                      _android={{ boxSize: 0.04 * viewportHeight }}
-                      paddingTop={0}
-                      paddingBottom={0}
-                      paddingLeft={2}
-                      borderColor="black"
-                      fontSize={0.02 * viewportHeight}
-                      fontFamily="Prompt-Regular"
-                      accessibilityLabel="เลือกสถานะลงจุดซ่อม(GIS)"
-                      placeholder="เลือกสถานะลงจุดซ่อม(GIS)"
-                      selectedVal={handleProcessPipes()}
-                      isDisabled={disProcesspipes()}
-                      onValueChange={(itemValue) =>
-                        setPickerData("processpipes", itemValue)
-                      }
-                      _selectedItem={{
-                        bg: "#2c689e",
-                        endIcon: <CheckIcon size={4} />,
-                      }}
-                    >
-                      {arrProcessGIS.map((val, index) => (
-                        <Select.Item
-                          key={index}
-                          label={val.label}
-                          value={val.value}
-                        />
-                      ))}
-                    </Select>
-                  </VStack>
-                  {/* <View style={{ alignItems: 'center' }}>
-                      <CheckBox
-                        containerStyle={{
-                          borderColor: 'transparent',
-                          backgroundColor: 'transparent',
-                          paddingRight: 0,
-                        }}
-                        checked={checked}
-                        onPress={() => {
-                          toggleChecked(!checked);
-                          setToggleCheckedSizePipe(false);
-                        }}
-                      />
-                    </View>
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                      <Text style={textsty.text_normal_bold}>
-                        GIS ไม่ตรงกับหน้างาน
-                      </Text>
-                    </View> */}
                 </View>
                 <View style={WorkCarryRepairStyle.space} />
                 <Text style={textsty.text_normal_bold}>ลักษณะพื้นผิว</Text>
                 <VStack alignItems="center" space={4}>
-                  <Select
-                    key={"select6"}
-                    selectedValue={pickerdVal.serfaces}
-                    width="100%"
-                    _ios={{ boxSize: 0.04 * viewportHeight }}
-                    _android={{ boxSize: 0.04 * viewportHeight }}
-                    paddingTop={0}
-                    paddingBottom={0}
-                    paddingLeft={2}
-                    borderColor="black"
-                    fontSize={0.02 * viewportHeight}
-                    fontFamily="Prompt-Regular"
-                    accessibilityLabel="ลักษณะพื้นผิว"
-                    placeholder="ลักษณะพื้นผิว"
-                    selectedVal={handleSurfaceAppearance()}
-                    onValueChange={(itemValue) =>
-                      setPickerData("serfaces", itemValue)
-                    }
-                    _selectedItem={{
-                      bg: "#2c689e",
-                      endIcon: <CheckIcon size={4} />,
+                  <DropDownPicker
+                    open={serfacesPicker}
+                    value={pickerdVal.serfaces}
+                    items={props.getSerfaces.map((val) => {
+                      return {
+                        label: val.label,
+                        value: val.value,
+                      };
+                    })}
+                    setOpen={setSerfacesPicker}
+                    onSelectItem={(itemValue) => {
+                      setPickerData("serfaces", itemValue.value);
                     }}
-                  >
-                    {props.getSerfaces.map((val, index) => (
-                      <Select.Item
-                        key={index}
-                        label={val.label}
-                        value={val.value}
-                      />
-                    ))}
-                  </Select>
+                    placeholder="เลือกลักษณะพื้นผิว"
+                  />
                 </VStack>
                 <View style={WorkCarryRepairStyle.space} />
                 <View style={{ flexDirection: "row" }}>
                   <View style={{ flex: 2, marginRight: 5 }}>
-                    <Text style={textsty.text_normal_bold}>
-                      ขนาดหลุม (เมตร)
-                    </Text>
+                    <Text style={textsty.text_normal_bold}>ขนาดหลุม</Text>
                   </View>
                 </View>
                 <View style={{ flexDirection: "row" }}>
                   <View style={{ flex: 2, marginRight: 5 }}>
                     <InputNormal
-                      typeOfInput="decimal"
                       hint="กว้าง"
                       onChangeText={(text) => setHoleWidth(text)}
                       val={holeWidth}
@@ -1718,7 +1623,6 @@ export default function WorkCarryRepairScreen(props) {
                   </View>
                   <View style={{ flex: 2, marginRight: 5 }}>
                     <InputNormal
-                      typeOfInput="decimal"
                       hint="ยาว"
                       onChangeText={(text) => setHoleLength(text)}
                       val={holeLength}
@@ -1727,7 +1631,6 @@ export default function WorkCarryRepairScreen(props) {
                   </View>
                   <View style={{ flex: 2, marginRight: 5 }}>
                     <InputNormal
-                      typeOfInput="decimal"
                       hint="ลึก"
                       onChangeText={(text) => setHoleDepth(text)}
                       val={holeDepth}
