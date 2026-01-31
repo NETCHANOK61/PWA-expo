@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { View, Dimensions, Text, StyleSheet, SafeAreaView } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
@@ -9,9 +9,12 @@ import BottomTab from "../../components/bottom/BottomTab";
 import { timeNow, dateNowTh } from "../../utils/Date";
 import * as workCarryRepairAction from "../../actions/jobsurvey/WorkCarryRepairAction";
 import * as WorkRepairDetailAction from "../../actions/workrepair/WorkRepairDetailAction";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 
 export default function MainTabScreen({ props, navigation }) {
+  const route = useRoute();
   const dispatch = useDispatch();
+  const [jobCode, setJobCode] = React.useState("");
   const workCarrayRepairReducer = useSelector(
     (state) => state.workCarrayRepairReducer
   );
@@ -32,9 +35,55 @@ export default function MainTabScreen({ props, navigation }) {
     reMemViewWorkCarryRepair();
     return () => {};
   };
+
   useEffect(() => {
     init();
   }, []);
+
+  useEffect(() => {
+    if (workRepairDetailReducer.dataArray?.rwId) {
+      setIndex(0);
+      // ✅ บังคับให้ Tab ซ่อมโหลดใหม่
+      setJobCode(workRepairDetailReducer.dataArray.rwId); // ถ้าคุณใช้ state นี้เป็น props
+    }
+  }, [workRepairDetailReducer.dataArray]);
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (route.params?.job_code) {
+  //       setJobCode(route.params.job_code);
+  //       navigation.setOptions({
+  //         title: route.params.job_code,
+  //         headerTitleAlign: "center",
+  //         headerTitleStyle: {
+  //           fontFamily: "Prompt-Bold",
+  //           fontSize: 18,
+  //           color: "#2c689e",
+  //         },
+  //       });
+  //     }
+  //   }, [route.params?.job_code])
+  // );
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setIndex(0);
+  //     if (route.params?.job_code) {
+  //       setJobCode(route.params.job_code);
+  //       navigation.setOptions({
+  //         title: route.params.job_code,
+  //         headerTitleAlign: "center",
+  //         headerTitleStyle: {
+  //           fontFamily: "Prompt-Bold",
+  //           fontSize: 18,
+  //           color: "#2c689e",
+  //         },
+  //       });
+
+  //       reMemViewWorkCarryRepair(); // ✅ เพิ่มตรงนี้
+  //     }
+  //   }, [route.params?.job_code])
+  // );
 
   const reMemViewWorkCarryRepair = () => {
     if (workRepairDetailReducer.dataArray.process != null) {
@@ -155,30 +204,72 @@ export default function MainTabScreen({ props, navigation }) {
     return arrr1;
   };
 
-  const renderScene = SceneMap({
-    workrepairdetail: () => (
-      <WorkRepairDetailScreen
-        {...props}
-        navigation={navigation}
-        data={workRepairDetailReducer.dataArray}
-      />
-    ),
-    worksurvey: () => (
-      <WorkSurveyScreen {...props} navigation={navigation} data={workRepairDetailReducer.dataArray} />
-    ),
-    workCarryRepair: () => (
-      <WorkCarryRepairScreen
-        {...props}
-        navigation={navigation}
-        empoyees={empoyees()}
-        getLeakwounds={getLeakwounds()}
-        getSerfaces={getSerfaces()}
-        getTypeOfPipes={getTypeOfPipes()}
-        getRequestTyp={getRequestType()}
-        data={workRepairDetailReducer.dataArray}
-      />
-    ),
-  });
+  // const renderScene = SceneMap({
+  //   workrepairdetail: () => (
+  //     <WorkRepairDetailScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  //   worksurvey: () => (
+  //     <WorkSurveyScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  //   workCarryRepair: () => (
+  //     <WorkCarryRepairScreen
+  //       {...props}
+  //       navigation={navigation}
+  //       empoyees={empoyees()}
+  //       getLeakwounds={getLeakwounds()}
+  //       getSerfaces={getSerfaces()}
+  //       getTypeOfPipes={getTypeOfPipes()}
+  //       getRequestTyp={getRequestType()}
+  //       data={workRepairDetailReducer.dataArray}
+  //     />
+  //   ),
+  // });
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case "workrepairdetail":
+        return (
+          <WorkRepairDetailScreen
+            {...props}
+            navigation={navigation}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      case "worksurvey":
+        return (
+          <WorkSurveyScreen
+            {...props}
+            navigation={navigation}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      case "workCarryRepair":
+        return (
+          // <View>
+          //   <Text>workCarryRepair</Text>
+          // </View>
+          <WorkCarryRepairScreen
+            {...props}
+            navigation={navigation}
+            empoyees={empoyees()}
+            getLeakwounds={getLeakwounds()}
+            getSerfaces={getSerfaces()}
+            getTypeOfPipes={getTypeOfPipes()}
+            getRequestTyp={getRequestType()}
+            data={workRepairDetailReducer.dataArray}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   const switchTab = (idTab) => {
     setIndex(idTab);

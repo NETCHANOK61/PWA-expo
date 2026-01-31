@@ -31,7 +31,8 @@ import {
 } from "../../utils/permissionsDevice";
 import DropDownPicker from "react-native-dropdown-picker";
 
-export default function DetailWorkCallScreen({ props, navigation }) {
+export default function DetailWorkCallScreen(props) {
+  const { navigation } = props;
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -222,20 +223,46 @@ export default function DetailWorkCallScreen({ props, navigation }) {
     }
   };
 
+  // const createRepairWork = async () => {
+  //   const profile = await getProfile().then((data) => {
+  //     return data;
+  //   });
+  //   toggleOverlay(1);
+  //   setVisibleLoading(true);
+  //   dispatch(
+  //     receiveRepairDetailAction.createRepairWork(
+  //       viewData[0],
+  //       profile.account_id,
+  //       props,
+  //       settingAlert
+  //     )
+  //   );
+  // };
+
   const createRepairWork = async () => {
-    const profile = await getProfile().then((data) => {
-      return data;
-    });
-    toggleOverlay(1);
-    setVisibleLoading(true);
-    dispatch(
-      receiveRepairDetailAction.createRepairWork(
-        viewData[0],
-        profile.account_id,
-        props,
-        settingAlert
-      )
-    );
+    // console.log("⚙️ Starting createRepairWork...");
+
+    try {
+      const profile = await getProfile();
+
+      toggleOverlay(1);
+      setVisibleLoading(true);
+      dispatch(
+        receiveRepairDetailAction.createRepairWork(
+          viewData[0],
+          profile.account_id,
+          props,
+          settingAlert
+        )
+      );
+    } catch (err) {
+      // console.error("❌ createRepairWork failed", err);
+      settingAlert({
+        visible: true,
+        type: "error",
+        message: "ไม่สามารถสร้างงานซ่อมได้ กรุณาลองใหม่",
+      });
+    }
   };
 
   const handlersReject = () => {
@@ -263,10 +290,10 @@ export default function DetailWorkCallScreen({ props, navigation }) {
     });
 
     if (viewData[0].caseLatitude == "" && viewData[0].caseLongtitude == "") {
-      console.log(viewData[0].caseLatitude)
+      // console.log(viewData[0].caseLatitude);
       settingAlert("ALERT_LOCATION", "");
     } else {
-      console.log("viewData[0]: ", viewData[0], profile.ww_code)
+      // console.log("viewData[0]: ", viewData[0], profile.ww_code);
       navigation.navigate("location", {
         viewData: viewData[0],
         ww_code: profile.ww_code,

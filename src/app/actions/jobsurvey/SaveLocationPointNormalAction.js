@@ -52,7 +52,6 @@ export const saveLocationPointNormal = (props, location, capture, mapSnap, callB
         MapSnap : mapSnap.toString(),
         SnapPipeStatus: mapSnap.toString(),
       };
-
       await serviveAxios('POST', req, url.updateRepairWorkSurvey)
         .then(async res => {
           dispatch(setStateSaveLocationPointNormalSuccess(res.data));
@@ -77,7 +76,7 @@ export const saveLocationPointNormal = (props, location, capture, mapSnap, callB
           checkedToken(error, props);
         });
     } catch (error) {
-      console.log(errro);
+      console.log(error);
     }
   };
 };

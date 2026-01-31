@@ -11,9 +11,12 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Platform
 } from "react-native";
+import Constants from "expo-constants";
 import * as LoginAction from "../actions/LoginAction";
 import { useSelector, useDispatch } from "react-redux";
+import { getRememberLogin, getCheckEmployee } from "../utils/Storage";
 const { width: viewportWidth, height: viewportHeight } =
   Dimensions.get("window");
 import { CheckBox } from "react-native-elements";
@@ -28,6 +31,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function LoginScreen(props) {
+  const appVersion = Constants?.expoConfig?.version || "10.0.42";
   const dispatch = useDispatch();
   const ref_inputPassword = useRef();
 
@@ -55,19 +59,32 @@ export default function LoginScreen(props) {
     onCancelPress: () => {},
   });
 
-  const init = async () => {
-    const remem = await getRememberLogin().then((data) => {
-      return data;
-    });
+  // const init = async () => {
+  //   const remem = await getRememberLogin().then((data) => {
+  //     return data;
+  //   });
 
-    const checkEmployee = await getCheckEmployee().then((data) => {
-      return data;
-    });
+  //   const checkEmployee = await getCheckEmployee().then((data) => {
+  //     return data;
+  //   });
+
+  //   if (remem != null) {
+  //     setUsername(remem.username);
+  //     setPassword(remem.password);
+  //     setTogleCheckEmployee(checkEmployee == "1" ? true : false);
+  //     toggleChecked(true);
+  //   } else {
+  //     toggleChecked(false);
+  //   }
+  // };
+  const init = async () => {
+    const remem = await getRememberLogin();
+    const checkEmployee = await getCheckEmployee();
 
     if (remem != null) {
       setUsername(remem.username);
       setPassword(remem.password);
-      setTogleCheckEmployee(checkEmployee == "1" ? true : false);
+      setTogleCheckEmployee(checkEmployee == "1");
       toggleChecked(true);
     } else {
       toggleChecked(false);
@@ -77,6 +94,7 @@ export default function LoginScreen(props) {
   useEffect(() => {
     init();
   }, []);
+
   const setStateAlert = (
     _titleIcon,
     _showConfirmButton,
@@ -401,9 +419,11 @@ export default function LoginScreen(props) {
         style={{ alignItems: "center", flex: 8, justifyContent: "flex-end" }}
       >
         <Text style={textsty.text_bold}>
-          {"Copyright © PWA Field Service (v.1.0.42)"}
+          {`Copyright © PWA Field Service (${appVersion})`}
         </Text>
-        <Text style={textsty.text_bold}>{"Deverlop Update: 22/11/2567 12.00PM"}</Text>
+        <Text style={textsty.text_bold}>
+          {"Deverlop Update: 22/09/2568 01:00 PM"}
+        </Text>
       </View>
       <LoadingSpinner
         width={0.55 * viewportWidth}
@@ -435,4 +455,4 @@ export default function LoginScreen(props) {
       />
     </ImageBackground>
   );
-};
+}

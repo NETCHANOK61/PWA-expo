@@ -198,7 +198,7 @@ export default function Map(props) {
     // console.log(props.latitude + ',' + props.longitude);
     if (props.searchClick == true) {
       webview.current.injectJavaScript(
-        ` mymap.setView([${props.latitude},${props.longitude}], 18);
+        ` mymap.setView([${props.latitude},${props.longitude}], 12);
           if(markerJob != null)
           { mymap.removeLayer(markerJob); }
           DrawMarker2(${props.latitude},${props.longitude});
@@ -207,7 +207,7 @@ export default function Map(props) {
       props.callbackSearchClick();
     } else {
       webview.current.injectJavaScript(
-        `mymap.setView([${props.latitude},${props.longitude}], 18);
+        `mymap.setView([${props.latitude},${props.longitude}], 12);
         if(markerJob != null)
         { mymap.removeLayer(markerJob); }
         DrawMarker2(${props.latitude},${props.longitude});
@@ -370,7 +370,7 @@ export default function Map(props) {
                 ////Codeding MAP
                 mymap = L.map('map',{
                     layers: [wmsLayer_gis_pipe, wmsLayer_gis_house, googleHybrid]
-                }).setView([${location.latitude},${location.longitude}], 16);
+                }).setView([${location.latitude},${location.longitude}], 12);
         
                 mymap.options.minZoom = 10;
                 // mymap.options.maxZoom = 22;
@@ -405,7 +405,7 @@ export default function Map(props) {
                             onClick: function(btn, map) {
                                 mymap.setView([${location.latitude},${
           location.longitude
-        }],16);
+        }],12);
                             }
                     }]
                 });
@@ -439,7 +439,8 @@ export default function Map(props) {
                 markerJob  = L.marker(e.latlng,{draggable: true, autoPan: true, icon: ColorMarker(1)}).addTo(mymap);
                 markerJob.bindPopup('จุดซ่อม '+ e.latlng).addTo(mymap);
                 var group = new L.featureGroup([markerJob]);
-                mymap.fitBounds(group.getBounds());
+                // mymap.fitBounds(group.getBounds());
+                mymap.fitBounds(group.getBounds(), { maxZoom: 14 });
         
                 markerJob.on("dragend", function(e) {
                     var markerXY = e.target;
@@ -457,7 +458,8 @@ export default function Map(props) {
             function centerLeafletMapOnMarker(map, marker) {
                 var latLngs = [ marker.getLatLng() ];
                 var markerBounds = L.latLngBounds(latLngs);
-                map.fitBounds(markerBounds);
+                // map.fitBounds(markerBounds);
+                map.fitBounds(markerBounds, { maxZoom: 14 });
             }
             
             function toFixed (num, pre) {

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useIsFocused } from "@react-navigation/native";
-import { getProfile, removeStore, removeRemem } from "../../utils/Storage";
+import { getProfile, removeStore, removeRemem, getRememberLogin } from "../../utils/Storage";
 import textStyle from "../../styles/TextStyle";
 import CardList from "../../components/card/CardList";
 import * as profileAction from "../../actions/profile/ProfileAction";
@@ -148,16 +148,29 @@ const ProfileScreen = (props) => {
       },
       {
         text: "ยืนยัน",
-        onPress: () => {
-          props.navigation.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          });
-          removeStore();
-          removeRemem();
-          removeCheckEmployee();
+        onPress: async () => {
+          try {
+            const remem = await getRememberLogin();
+
+            // ลบข้อมูลโปรไฟล์และ token
+            await removeStore();
+
+            // ✅ ถ้าไม่มีข้อมูล remem (ผู้ใช้ไม่ได้ติ๊กจำไว้) ให้ลบ check employee ด้วย
+            if (!remem) {
+              await removeCheckEmployee();
+            }
+
+            // Reset navigation และ dispatch logout
+            props.navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+            dispatch({ type: "ACTION_LOGOUT" });
+          } catch (err) {
+            console.log("❌ Logout Error:", err);
+          }
         },
-        style: "cancel",
+        style: "default",
       },
     ]);
   };

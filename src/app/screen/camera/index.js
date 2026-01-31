@@ -9,6 +9,7 @@ import {
   View,
   Image,
   Dimensions,
+  StyleSheet,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -20,7 +21,6 @@ import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as cameraAction from "../../actions/camera/CameraAction";
-import ImageResizer from "react-native-image-resizer";
 
 import styles from "./Style";
 
@@ -182,164 +182,89 @@ export default function App(props) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: "10%" }]}>
+    <View style={{ flex: 1 }}>
+      {/* กล้องเต็มจอ */}
       <CameraView
-        style={styles.camera}
+        style={StyleSheet.absoluteFill}
         facing={facing}
         ref={cameraRef}
         flash={flash}
         zoom={zoom}
+      />
+
+      {/* ปุ่ม overlay บนกล้อง */}
+      <View
+        style={{
+          position: "absolute",
+          top: 40,
+          left: 0,
+          right: 0,
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+          paddingHorizontal: 20,
+        }}
       >
-        <View
-          style={{
-            flex: 0.5,
-            backgroundColor: "transparent",
-            flexDirection: "row",
-            justifyContent: "space-around",
-          }}
-        >
-          <TouchableOpacity
-            style={styles.flipIcon}
-            onPress={() => {
-              props.navigation.goBack();
-            }}
-          >
-            <FontAwesome
-              active
-              name="arrow-left"
-              style={{ color: "white", fontSize: 0.06 * viewportWidth }}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.flipIcon}
-            onPress={() => {
-              toggleCameraFacing();
-            }}
-          >
-            <FontAwesome
-              name="refresh"
-              type="FontAwesome"
-              style={{ color: "white", fontSize: 0.06 * viewportWidth }}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.flipIcon}
-            onPress={() => {
-              toggleFlash();
-            }}
-          >
-            <Ionicons
-              name="flash"
-              type="Ionicons"
-              style={{ color: "white", fontSize: 0.06 * viewportWidth }}
-            />
-            <Text style={styles.flipText}> {flash} </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.flipIcon}
-            onPress={() => {
-              toggleFocus();
-            }}
-          >
-            <MaterialIcons
-              name="center-focus-strong"
-              style={{ color: "white", fontSize: 0.06 * viewportWidth }}
-            />
-            <Text style={styles.flipText}> {autoFocus} </Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => props.navigation.goBack()}>
+          <FontAwesome name="arrow-left" size={28} color="white" />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.flipIcon}
-            onPress={() => {
-              toggleWB();
-            }}
-          >
-            <FontAwesome
-              name="magic"
-              style={{
-                color: "white",
-                fontSize: 0.06 * viewportWidth,
-              }}
-            />
-            <Text style={styles.flipText}> {whiteBalance}</Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flex: 0.4,
-            backgroundColor: "transparent",
-            flexDirection: "row",
-            alignSelf: "flex-end",
-          }}
-        ></View>
-        <LoadingSpinner
-          width={0.75 * viewportWidth}
-          height={0.18 * viewportHeight}
-          visible={visibleLoading}
-          textContent="กำลังโหลด"
-          color={"#0000ff"}
-        />
-        <View
-          style={{
-            flex: 0.3,
-            backgroundColor: "transparent",
-            flexDirection: "row",
-            alignSelf: "center",
-          }}
-        >
-          <TouchableOpacity
-            style={[styles.flipButton, { flex: 0.1, alignSelf: "flex-end" }]}
-            onPress={() => {
-              zoomIn();
-            }}
-          >
-            {/* <Text style={styles.flipText}> + </Text> */}
-            <MaterialIcons
-              name="zoom-in"
-              type="MaterialIcons"
-              style={{ color: "white", fontSize: 0.09 * viewportWidth }}
-            />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={toggleCameraFacing}>
+          <FontAwesome name="refresh" size={28} color="white" />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.buttonTakecamera,
-              { flex: 0.3, alignSelf: "flex-end" },
-            ]}
-            onPress={() => {
-              takePicture();
-            }}
-          >
-            <Image
-              source={require("../../assets/images/btn_takecamera.png")}
-              style={styles.btnImg}
-            />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={toggleFlash}>
+          <Ionicons name="flash" size={28} color="white" />
+          <Text style={styles.flipText}>{flash}</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.flipButton, { flex: 0.1, alignSelf: "flex-end" }]}
-            onPress={() => {
-              zoomOut();
-            }}
-          >
-            {/* <Text style={styles.flipText}> - </Text> */}
-            <MaterialIcons
-              name="zoom-out"
-              type="MaterialIcons"
-              style={{ color: "white", fontSize: 0.09 * viewportWidth }}
-            />
-          </TouchableOpacity>
-        </View>
-        {/* {photo && <Image source={{ uri: photo }} style={styles.preview} />} */}
-        {/* <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>Take Picture</Text>
-          </TouchableOpacity>
-        </View> */}
-      </CameraView>
+        <TouchableOpacity onPress={toggleFocus}>
+          <MaterialIcons name="center-focus-strong" size={28} color="white" />
+          <Text style={styles.flipText}>{autoFocus}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={toggleWB}>
+          <FontAwesome name="magic" size={28} color="white" />
+          <Text style={styles.flipText}>{whiteBalance}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ปุ่มล่าง (ซูม + ถ่ายรูป) */}
+      <View
+        style={{
+          position: "absolute",
+          bottom: 40,
+          left: 0,
+          right: 0,
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <TouchableOpacity onPress={zoomIn} style={{ marginHorizontal: 20 }}>
+          <MaterialIcons name="zoom-in" size={36} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={takePicture}>
+          <Image
+            source={require("../../assets/images/btn_takecamera.png")}
+            style={{ width: 70, height: 70 }}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={zoomOut} style={{ marginHorizontal: 20 }}>
+          <MaterialIcons name="zoom-out" size={36} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {/* โหลด */}
+      <LoadingSpinner
+        width={0.75 * viewportWidth}
+        height={0.18 * viewportHeight}
+        visible={visibleLoading}
+        textContent="กำลังโหลด"
+        color={"#0000ff"}
+      />
     </View>
   );
 }

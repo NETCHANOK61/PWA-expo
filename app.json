@@ -1,44 +1,49 @@
 {
   "expo": {
-    "entryPoint": "./index.js",
-    "newArchEnabled": true,
-    "name": "MyPWA",
-    "slug": "MyPWA",
-    "version": "1.0.0",
+    "name": "PWA Field Service",
+    "slug": "pwa-field-service",
+    "version": "2.0.8",
     "orientation": "portrait",
-    "icon": "./assets/icon_pwa.png'",
+    "icon": "assets/os-icon/prd.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/icon_pwa.png",
+      "image": "assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nineeagle.MyPWA"
+      "bundleIdentifier": "com.pwa.smart1662.ios",
+      "buildNumber": "3",
+      "infoPlist": {
+        "NSCameraUsageDescription": "แอปนี้ต้องการใช้กล้องเพื่อถ่ายภาพประกอบงาน",
+        "NSPhotoLibraryUsageDescription": "แอปนี้ต้องการเข้าถึงคลังภาพเพื่อเลือกรูปภาพ",
+        "NSPhotoLibraryAddUsageDescription": "แอปนี้ต้องการบันทึกรูปลงในคลังภาพ",
+        "NSLocationWhenInUseUsageDescription": "แอปนี้ใช้ตำแหน่งของคุณเพื่อระบุตำแหน่งหน้างาน",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon_pwa.png",
+        "foregroundImage": "assets/os-icon/prd.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.nineeagle.MyPWA"
+      "package": "com.pwa.smart1662.android",
+      "versionCode": 72,
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "assets/os-icon/prd.png"
     },
+    "plugins": ["expo-font"],
     "extra": {
       "eas": {
-        "projectId": "c0588afc-356a-4b06-bb69-9a0e86d5944a"
-      }
-    },
-    "owner": "water415",
-    "plugins": [
-      "expo-font"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "0450cd04-2cb2-4772-833c-7c8f63c9cf4c"
+        "projectId": "f01f2539-b4cc-43d1-9b50-7525c8c49ba7"
       }
     }
   }

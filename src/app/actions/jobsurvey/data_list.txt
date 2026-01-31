@@ -1,0 +1,30 @@
+//Producation
+url = 'https://smart1662.pwa.co.th';
+
+//Test
+url = 'https://smart1662-test.pwa.co.th';
+
+1. getEmployees: `${url}/smapilab/api/v2/RepairWork/GetEmployees`
+return [
+  { "empId": "1002794", "fNameTH": "FName1002794", "lNameTH": "LName1002794" },
+  { "empId": "Sarawut", "fNameTH": "Sarawut", "lNameTH": "Tantijun" },
+  { "empId": "sarayutra", "fNameTH": "นายศรายุทธ", "lNameTH": "ร่าเริง" }
+]
+
+2. getSerfaces: `${url}/smapilab/api/v2/Selection/GetSerfaces`
+return {"surfaces": [{"text": "ทางเท้าตัวหนอน", "value": "1"}, {"text": "ทางเท้าคอนกรีตบล็อก", "value": "2"}, {"text": "คอนกรีตไม่เสริมเหล็ก", "value": "3"}, {"text": "คอนกรีตเสริมเหล็ก", "value": "4"}, {"text": "ลาดยางแอสฟัลต์", "value": "5"}, {"text": "พื้นดิน", "value": "6"}]}
+
+3. getTypeOfPipes: `${url}/smapilab/api/v2/Selection/GetTypeOfPipes`
+return {"typeOfPipes": [{"text": "AC (ท่อซิเมนต์ ใยหิน)", "value": "AC"}, {"text": "CI (ท่อเหล็กหล่อ)", "value": "CI"}, {"text": "DI (ท่อเหล็กหล่อเหนียว)", "value": "DI"}, {"text": "GRP (Glass Reinforcement Pipe)", "value": "GRP"}, {"text": "GS (ท่อเหล็กอาบสังกะสี)", "value": "GS"}, {"text": "HDPE (High Density Polyethylene Pipe)", "value": "HDPE"}, {"text": "PBP (Polybuthylene Pipe)", "value": "PB"}, {"text": "PVC (ท่อ พี.วี.ซี.)", "value": "PVC"}, {"text": "ST (ท่อเหล็ก", "value": "ST"}, {"text": "ST_CV (ท่อปลอก)", "value": "ST_CV"}, {"text": "ST_ON (ท่อเหล็กบนดิน)", "value": "ST_ON"}, {"text": "ST_UN (ท่อเหล็กใต ดิน)", "value": "ST_UN"}]}
+
+4. getSizeOfPipes: `${url}/smapilab/api/v2/Selection/GetSizeOfPipes`
+return {"requestTypes": [{"text": "ข้อร้องเรียน", "value": 1}, {"text": "การติดตามเร่งรัดข้อร้องเรียนเดิม", "value": 2}, {"text": "ข้อสอบถามทั่วไป", "value": 3}, {"text": "ความต้องการ ความคาดหวัง และข้อเสนอแนะ", "value": 4}, {"text": "การแจ้งเหตุ", "value": 5}, {"text": "คำชม และอื่นๆ", "value": 6}]}
+
+5. getRequestCategorySubject: `${url}/smapilab/api/v2/Selection/GetRequestCategorySubject`
+return {"message": "No HTTP resource was found that matches the request URI 'https://smart1662-test.pwa.co.th/smapilab/api/v2/Selection/GetRequestCategorySubject'."}
+
+6. getLeakWounds: `${url}/smapilab/api/v2/Selection/GetLeakWounds`
+return {"data": [{"text": "undefined", "value": "99"}, {"text": "แตกเป็นชิ้น Piece blown Out", "value": "1"}, {"text": "แตกเป็นรูขนาดเล็ก Perforation", "value": "2"}, {"text": "แตกตามแนวขนานเส้นรอบวงท่อ Broken back (Circumferential break)", "value": "3"}, {"text": "แตกตามแนวขนานกับความยาวท่อ Longitudinal split", "value": "4"}, {"text": "ผนังท่อหลุดร่อน Pipe wall rupture/tear", "value": "5"}, {"text": "แตกจากการติดตั้งอุปกรณ์รัดแยกหรือการตัดประสาน Associated with or during tapping", "value": "6"}, {"text": "รอยแตกรั่วบริเวณข้อต่อ Leaking joint", "value": "7"}, {"text": "ผุกร่อนจากการเกิดสนิม Corrosion", "value": "8"}, {"text": "แตกรั่วจากแรงดันภายในท่อ Over Pressure", "value": "9"}, {"text": "แตกรั่วจากแรงภายนอก Outside Force", "value": "10"}]}
+
+7. serchRepairWork: `${url}/smapilab/api/v2/RepairWork/SearchRepairWork`
+return [{"accountId": "34480", "brokenType": "", "brokenTypeColor": "btn-l6", "brokenTypeName": "แก้ไข", "caseDetail": "", "createdBy": "34480", "createdDate": "2025-07-17T09:55:03.32", "endSLADate": "17/07/2568 09:53 (S2025071700001) ต้องตอบกลับภายใน:18/07/2568 09:53 น.", "informerName": "ทดสอบ ระบบ", "informerTelephone": "0632128395", "location": "", "notificationDate": "17072025", "notificationTime": "09:55", "pwaIncidentNo": "S2025071700001", "reason": "", "receivedCaseDate": "17/07/2568 09:53", "requestCategory": 2, "requestCategoryName": "ด้านท่อแตกรั่ว", "requestCategorySubject": 3, "requestCategorySubjectName": "ท่อแตกรั่วขนาดเส้นผ่าศูนย์กลาง 2 นิ้วลงมา (ท่อที่อยู่อาศัย)", "requestType": 1, "requestTypeName": "ข้อร้องเรียน", "rwCode": "R202507000003", "rwId": 575774, "sla": "0", "status": "6", "statusDesc": "อยู่ระหว่างซ่อม", "superAccountId": "", "superAccountName": null, "updatedBy": null, "updatedDate": null, "workingDate": "17/07/2568 09:55", "workingTime": "09:55"}]

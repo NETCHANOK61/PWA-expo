@@ -11,7 +11,7 @@ export default {
   // RecevieRepair
   getIncidents: `${url}/smapilab/api/v2/Incident/GetIncidents`,
   getIncidentByIds: `${url}/smapilab/api/v2/Incident/GetIncidentByIds`,
-  // getBaseData: `${url}/smapilab/api/v2/Incident/GetBaseData`,
+  getBaseData: `${url}/smapilab/api/v2/Incident/GetBaseData`,
   reject: `${url}/smapilab/api/v2/Incident/Reject`,
 
   // Repair work

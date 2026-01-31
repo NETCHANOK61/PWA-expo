@@ -7,18 +7,13 @@ import {
   TextInput,
   Dimensions,
   Platform,
+  StyleSheet,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { CheckBox } from "react-native-elements";
-import {
-  Select,
-  VStack,
-  CheckIcon,
-  NativeBaseProvider,
-  HStack,
-  Icon,
-} from "native-base";
-import DropDownPicker from "react-native-dropdown-picker";
+import { Dropdown } from "react-native-element-dropdown";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { NativeBaseProvider, HStack } from "native-base";
 
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -52,11 +47,12 @@ import {
   checkPermissionsAccept,
   requestPermissionsAccept,
 } from "../../utils/permissionsDevice";
-import CustomDropDown from "../../components/dropdown-picker";
+import workRepairDetailStyle from "../../styles/WorkRepairDetailStyle";
 
-const InputNormal = ({ hint, onChangeText, val, color, dis }) => {
+const InputNormal = ({ hint, onChangeText, val, color = "#2c689e", dis, typeOfInput }) => {
   return (
     <TextInput
+      inputMode={typeOfInput}
       style={[
         WorkCarryRepairStyle.textinput,
         { borderColor: color, color: "black" },
@@ -103,6 +99,14 @@ export default function WorkCarryRepairScreen(props) {
   const [holeWidth, setHoleWidth] = useState("");
   const [arrPipeSize, setArrPipeSize] = useState([]);
   const [arrProcessGIS, setArrProcessGIS] = useState([]);
+
+  const [leakwoundisFocus, setLeakwoundIsFocus] = useState(false);
+  const [empoyeesisFocus, setEmpoyeesIsFocus] = useState(false);
+  const [tpyofpipesisFocus, setTpyofpipesisFocus] = useState(false);
+  const [sizeofpipesisFocus, setSizeofpipesisFocus] = useState(false);
+  const [processGISisFocus, setProcessGISisFocus] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+
   // Begin New Picker DateTime
   const [show, setShow] = useState(false);
   const [customPickerdateTime, setCustomPickerdateTime] = useState({
@@ -127,6 +131,7 @@ export default function WorkCarryRepairScreen(props) {
     sizeofpipes: "",
     processpipes: "",
     leakwound: "",
+    leakwound_s: "",
   });
 
   const [customAlert, setCustomAlert] = useState({
@@ -140,108 +145,119 @@ export default function WorkCarryRepairScreen(props) {
     onCancelPress: () => {},
   });
 
-  // picker
-  const [empoyeesPicker, setEmpoyeesPicker] = useState(false); // ผู้ซ่อม
-  const [leakwoundPicker, setLeakwoundPicker] = useState(false); // ลักษณะการแตก
-  const [serfacesPicker, setSerfacesPicker] = useState(false); // ลักษณะพื้นผิว
   // spiner load
   const [visibleLoading, setVisibleLoading] = useState(false);
   const [isLoaddingSave, setIsLoaddingSave] = useState(false);
 
   const init = async () => {
-    setVisibleLoading(true);
+    // ✅ เคลียร์ค่าเดิม
+    setDateTime({
+      dateForm: "",
+      dateTo: "",
+      dateTextTure: "",
+      timeFrom: "",
+      timeTo: "",
+      timeTextTrue: "",
+    });
+
+    setPickerdVal({
+      empoyees: "",
+      serfaces: "",
+      tpyofpipes: "",
+      sizeofpipes: "",
+      processpipes: "",
+      leakwound: "",
+      leakwound_s: "",
+    });
+
+    setBrokenAppearance("");
+    setHoleDepth("");
+    setHoleLength("");
+    setHoleWidth("");
+    setArrPipeSize([]);
+    setArrProcessGIS([]);
+    toggleChecked(false);
+    toggleCheckedLat(false);
+    setToggleCheckedSizePipe(false);
+
+    // ✅ ดึงค่าจาก props.data ใหม่ (หลัง save)
+    if (props.data?.process) {
+      setBrokenAppearance(props.data.process.brokenAppearance || "");
+      setHoleDepth(props.data.process.holeDepth || "");
+      setHoleLength(props.data.process.holeLength || "");
+      setHoleWidth(props.data.process.holeWidth || "");
+
+      // ตัวอย่างเติม picker
+      setPickerdVal((prev) => ({
+        ...prev,
+        empoyees: props.data.process.empoyeeId || "",
+        serfaces: props.data.process.surfaceId || "",
+        tpyofpipes: props.data.process.pipeTypeId || "",
+        leakwound: props.data.process.woundId || "",
+        // etc.
+      }));
+
+      // ✅ ตั้ง toggle ต่าง ๆ
+      toggleChecked(!!props.data.process.isNotGIS);
+      toggleCheckedLat(!!props.data.process.useLatlong);
+    }
+
+    // ✅ โหลด dropdown ต่าง ๆ
     loadDataSetView();
     loadDataPinLocationPip();
-    pickerProcess();
+
     let checkPermissions = await checkPermissionsAccept();
-    if (checkPermissions != true) {
-      await requestPermissionsAccept();
-    }
+    if (!checkPermissions) await requestPermissionsAccept();
   };
+
   useEffect(() => {
-    init();
-  }, []);
+    if (props.data?.rwId) {
+      init();
+    }
+    // console.log("WorkCarryRepairScreen", props.data)
+  }, [props.data?.rwId]);
+
+  useEffect(() => {
+    if (workRepairDetailReducer.dataArray?.survey) {
+      loadDataPinLocationPip();
+    }
+  }, [workRepairDetailReducer.dataArray?.survey]);
 
   const loadDataSetView = () => {
-    if (props.data.process == null) {
-      setViewTime();
-    } else {
-      if (workCarrayRepairReducer.rememViewWorkCarray.sts == "1") {
-        setDateTime((current) => ({
-          ...current,
-          dateForm:
-            props.data.process.fromProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.fromProcessDate),
-          dateTo:
-            props.data.process.toProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.toProcessDate),
-          dateTextTure:
-            props.data.process.surfaceFixedDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.surfaceFixedDate),
-          timeFrom:
-            props.data.process.fromProcessTime == ""
-              ? timeNow()
-              : props.data.process.fromProcessTime,
-          timeTo:
-            props.data.process.toProcessTime == ""
-              ? timeNow()
-              : props.data.process.toProcessTime,
-          timeTextTrue:
-            props.data.process.surfaceFixedTime == ""
-              ? timeNow()
-              : props.data.process.surfaceFixedTime,
-        }));
+    const process = props.data?.process;
+    // console.log(process);
 
-        const obj = {
-          sts: "2",
-          dateForm:
-            props.data.process.fromProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.fromProcessDate),
-          dateTo:
-            props.data.process.toProcessDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.toProcessDate),
-          dateTextTure:
-            props.data.process.surfaceFixedDate == ""
-              ? dateNowTh()
-              : convertDateServiceToDateTh(props.data.process.surfaceFixedDate),
-          timeFrom:
-            props.data.process.fromProcessTime == ""
-              ? timeNow()
-              : props.data.process.fromProcessTime,
-          timeTo:
-            props.data.process.toProcessTime == ""
-              ? timeNow()
-              : props.data.process.toProcessTime,
-          timeTextTrue:
-            props.data.process.surfaceFixedTime == ""
-              ? timeNow()
-              : props.data.process.surfaceFixedTime,
-        };
-
-        dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
-      } else {
-        setViewTime();
-      }
-
-      setBrokenAppearance(
-        props.data.process.brokenAppearance == ""
-          ? ""
-          : props.data.process.brokenAppearance
-      );
-
-      toggleChecked(
-        props.data.process.isNotGIS == "0" || props.data.process.isNotGIS == ""
-          ? false
-          : true
-      );
-      loadData_saveSizeHole();
-      loadData_savePickerVal();
+    if (!process) {
+      setDateTime({
+        dateForm: dateNowTh(),
+        dateTo: dateNowTh(),
+        dateTextTure: dateNowTh(),
+        timeFrom: timeNow(),
+        timeTo: timeNow(),
+        timeTextTrue: timeNow(),
+      });
+      return;
     }
+
+    setDateTime({
+      dateForm: process.fromProcessDate
+        ? convertDateServiceToDateTh(process.fromProcessDate)
+        : dateNowTh(),
+      dateTo: process.toProcessDate
+        ? convertDateServiceToDateTh(process.toProcessDate)
+        : dateNowTh(),
+      dateTextTure: process.surfaceFixedDate
+        ? convertDateServiceToDateTh(process.surfaceFixedDate)
+        : dateNowTh(),
+      timeFrom: process.fromProcessTime || timeNow(),
+      timeTo: process.toProcessTime || timeNow(),
+      timeTextTrue: process.surfaceFixedTime || timeNow(),
+    });
+
+    setBrokenAppearance(process.brokenAppearance || "");
+    // toggleChecked(process.isNotGIS === "1");
+    loadData_saveSizeHole();
+    loadData_savePickerVal();
     setVisibleLoading(false);
   };
 
@@ -258,42 +274,150 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const loadData_savePickerVal = () => {
+    // console.log("TypePipe:", props.data.process.piplineType);
+    // console.log("Picker Value State:", pickerdVal);
+    // console.log("props.data.process****:", props.data.process);
+
+    sizeofpipe(props.data.process.piplineType);
     let leakWound_id = "99";
     if (props.data.process.leakWound_id) {
       leakWound_id = props.data.process.leakWound_id.toString();
     }
+    // console.log(leakWound_id)
 
     setPickerdVal((_state) => ({
-      ..._state,
-      tpyofpipes: props.data.process.piplineType,
-      sizeofpipes: props.data.process.piplineSize,
-      serfaces: props.data.process.surfaceAppearance,
-      empoyees: props.data.process.repaireAccountId,
-      processpipes: props.data.process.isNotGIS,
-      leakwound: leakWound_id,
+      tpyofpipes: props.data.process.piplineType?.toString() ?? "",
+      sizeofpipes: props.data.process.piplineSize?.toString() ?? "",
+      serfaces: props.data.process.surfaceAppearance?.toString() ?? "",
+      empoyees: props.data.process.repaireAccountId?.toString() ?? "",
+      processpipes: props.data.process.isNotGIS?.toString() ?? "",
+      leakwound: leakWound_id == "99" ? "" : leakWound_id,
     }));
-    sizeofpipe(props.data.process.piplineType);
+
+    // console.log("loadData_savePickerVal:", props.data.process);
   };
 
+  // const loadDataPinLocationPip = () => {
+  //   const survey = workRepairDetailReducer.dataArray?.survey || {};
+  //   const savePoint = saveLocationPointNormalReducer.dataObj || {};
+  //   // console.log(survey);
+  //   // console.log(savePoint);
+
+  //   // เช็กค่าพิกัดว่ามีหรือไม่
+  //   // const hasCoordinates =
+  //   //   !!survey?.latitude?.trim() && !!survey?.longtitude?.trim();
+  //   // toggleCheckedLat(hasCoordinates);
+  //   const hasCoordinates =
+  //     !!survey?.latitude &&
+  //     !!survey?.longtitude &&
+  //     survey.latitude.toString().trim() !== "" &&
+  //     survey.longtitude.toString().trim() !== "";
+  //   toggleCheckedLat(hasCoordinates);
+
+  //   if (saveLocationPointNormalReducer.dataObj != null) {
+  //     const { piplineType, piplineSize } = savePoint;
+
+  //     setPickerdVal((prev) => ({
+  //       ...prev,
+  //       tpyofpipes: piplineType || "",
+  //       sizeofpipes: piplineSize || "",
+  //       processpipes: piplineType || piplineSize ? "0" : "",
+  //     }));
+
+  //     sizeofpipe(piplineType);
+  //   } else {
+  //     const { piplineType, piplineSize } = survey;
+
+  //     setPickerdVal((prev) => ({
+  //       ...prev,
+  //       tpyofpipes: piplineType || "",
+  //       sizeofpipes: piplineSize || "",
+  //       processpipes:
+  //         piplineType && piplineSize ? "0" : piplineType === "" ? "" : "",
+  //     }));
+
+  //     sizeofpipe(piplineType);
+
+  //     // console.log("survey:", survey);
+  //     // console.log("savePoint:", savePoint);
+  //     // console.log("toggleCheckedLat:", hasNoCoordinates);
+  //   }
+  //   pickerProcess();
+  // };
+
+  // const loadDataPinLocationPip = () => {
+  //   const survey = workRepairDetailReducer.dataArray?.survey || {};
+  //   const savePoint = saveLocationPointNormalReducer.dataObj || {};
+
+  //   // 1. ถ้ามีพิกัดจาก survey (เคยบันทึกจริงแล้ว) → ใช้อันนี้เสมอ
+  //   if (
+  //     survey?.latitude &&
+  //     survey?.longtitude &&
+  //     survey.latitude.toString().trim() !== "" &&
+  //     survey.longtitude.toString().trim() !== ""
+  //   ) {
+  //     toggleCheckedLat(true);
+
+  //     const { piplineType, piplineSize } = survey;
+  //     setPickerdVal((prev) => ({
+  //       ...prev,
+  //       tpyofpipes: piplineType || "",
+  //       sizeofpipes: piplineSize || "",
+  //       processpipes: piplineType && piplineSize ? "0" : prev.processpipes,
+  //     }));
+
+  //     sizeofpipe(piplineType);
+  //     pickerProcess();
+  //     return; // ⬅️ จบเลย ไม่ต้องไปใช้ savePoint
+  //   }
+
+  //   // 2. ถ้าไม่มี survey แต่มี savePoint → ใช้อันนี้
+  //   if (savePoint?.latitude && savePoint?.longtitude) {
+  //     toggleCheckedLat(true);
+
+  //     const { piplineType, piplineSize } = savePoint;
+  //     setPickerdVal((prev) => ({
+  //       ...prev,
+  //       tpyofpipes: piplineType || "",
+  //       sizeofpipes: piplineSize || "",
+  //       processpipes: piplineType || piplineSize ? "0" : "",
+  //     }));
+
+  //     sizeofpipe(piplineType);
+  //     pickerProcess();
+  //     return;
+  //   }
+
+  //   // 3. ไม่มีอะไรเลย → แสดงว่า "ยังไม่ลงจุด"
+  //   toggleCheckedLat(false);
+  //   pickerProcess();
+  // };
+
   const loadDataPinLocationPip = () => {
-    toggleCheckedLat(
-      workRepairDetailReducer.dataArray.survey.latitude == "" &&
-        workRepairDetailReducer.dataArray.survey.latitude == ""
-        ? true
-        : false
-    );
-    if (saveLocationPointNormalReducer.dataObj != null) {
-      setPickerdVal((_state) => ({
-        ..._state,
-        tpyofpipes: saveLocationPointNormalReducer.dataObj.piplineType,
-        sizeofpipes: saveLocationPointNormalReducer.dataObj.piplineSize,
-        processpipes:
-          saveLocationPointNormalReducer.dataObj.piplineType != null ||
-          saveLocationPointNormalReducer.dataObj.piplineSize != null
-            ? "0"
-            : "",
+    const survey = workRepairDetailReducer.dataArray?.survey || {};
+
+    if (
+      survey?.latitude &&
+      survey?.longtitude &&
+      survey.latitude.toString().trim() !== "" &&
+      survey.longtitude.toString().trim() !== ""
+    ) {
+      toggleCheckedLat(true);
+
+      const { piplineType, piplineSize } = survey;
+      setPickerdVal((prev) => ({
+        ...prev,
+        tpyofpipes: piplineType || "",
+        sizeofpipes: piplineSize || "",
+        processpipes: piplineType && piplineSize ? "0" : prev.processpipes,
       }));
-      sizeofpipe(saveLocationPointNormalReducer.dataObj.piplineType);
+
+      sizeofpipe(piplineType);
+      pickerProcess();
+    } else {
+      // ไม่มีพิกัดเลย → ให้เตือนผู้ใช้ ไม่ไป set จาก GPS
+      toggleCheckedLat(false);
+      pickerProcess();
     }
   };
 
@@ -311,22 +435,27 @@ export default function WorkCarryRepairScreen(props) {
 
   // Start Picker
   const setPickerData = (nme, label) => {
-    console.log("setPickerData: ", label);
     setPickerdVal((_state) => ({
       ..._state,
       [nme]: label,
     }));
 
-    if (nme == "tpyofpipes") {
+    if (nme === "tpyofpipes") {
+      // console.log("tpyofpipes");
       sizeofpipe(label);
-      setPickerdVal((_state) => ({ ..._state, sizeofpipes: "" }));
+      setPickerdVal((_state) => ({
+        ..._state,
+        tpyofpipes: label.toString(),
+        sizeofpipes: "",
+      }));
     }
+
     if (nme == "processpipes") {
       if (label == 0) {
         if (
-          workRepairDetailReducer.dataArray.survey.pipe_id == "" ||
-          workRepairDetailReducer.dataArray.survey.piplineSize == "" ||
-          workRepairDetailReducer.dataArray.survey.piplineType == ""
+          workRepairDetailReducer.dataArray?.survey?.pipe_id == "" ||
+          workRepairDetailReducer.dataArray?.survey?.piplineSize == "" ||
+          workRepairDetailReducer.dataArray?.survey?.piplineType == ""
         ) {
           settingAlert("ALERT_WARNING_LOCATION");
         }
@@ -334,53 +463,38 @@ export default function WorkCarryRepairScreen(props) {
       } else {
         toggleChecked(true);
       }
-      setToggleCheckedSizePipe(false);
+      setToggleCheckedSizePipe(true);
     }
 
     if (nme == "leakwound") {
+      // console.log("leakwound");
       let _filterLeakwound = props.getLeakwounds.filter(
         (x) => x.value === label
       );
-      console.log(_filterLeakwound[0].label);
+      setPickerdVal((_state) => ({
+        ..._state,
+        leakwound_s: truncateText(_filterLeakwound[0].label, 20),
+      }));
       setBrokenAppearance(_filterLeakwound[0].label);
     }
   };
 
-  const setSateDataParams = (key, value) => {
-    setDateTime((currentState) => ({ ...currentState, [key]: value }));
-    const obj = {
-      sts: "2",
-      dateForm:
-        key == "dateForm"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateForm,
-      dateTo:
-        key == "dateTo"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateTo,
-      dateTextTure:
-        key == "dateTextTure"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.dateTextTure,
-      timeFrom:
-        key == "timeFrom"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeFrom,
-      timeTo:
-        key == "timeTo"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeTo,
-      timeTextTrue:
-        key == "timeTextTrue"
-          ? value
-          : workCarrayRepairReducer.rememViewWorkCarray.timeTextTrue,
-    };
+  const truncateText = (text, maxLength) => {
+    if (text && text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  };
 
-    dispatch(workCarryRepairAction.rememViewWorkCarryRepair(obj));
+  const setSateDataParams = (key, value) => {
+    setDateTime((currentState) => ({
+      ...currentState,
+      [key]: value,
+    }));
   };
 
   const sizeofpipe = async (value) => {
-    console.log("a", value)
+    // console.log("sizeofpipe", value)
     let arrr1 = [];
     if (value != "") {
       await getSizeOfPipes(value).then((data) => {
@@ -394,22 +508,53 @@ export default function WorkCarryRepairScreen(props) {
         }
       });
     }
-    setArrPipeSize(arrr1);
+    // const pipeSizeOptions = arrr1.map((size) => ({ label: size, value: size }));
+    const pipeSizeOptions = arrr1.map((size) => ({
+      label: size,
+      value: size.toString(),
+    }));
+    setArrPipeSize(pipeSizeOptions);
+    // console.log(pipeSizeOptions)​
   };
 
   const pickerProcess = () => {
     let pickerProcessArrr = [];
-    if (workRepairDetailReducer.radioPipe == "1") {
+    const pipeId = workRepairDetailReducer.dataArray?.survey?.pipe_id ?? "";
+    const isNotGIS = workRepairDetailReducer.dataArray?.process?.isNotGIS ?? "";
+    const latitude = workRepairDetailReducer.dataArray?.survey?.latitude ?? "";
+    const longtitude =
+      workRepairDetailReducer.dataArray?.survey?.longtitude ?? "";
+    const hasCoordinates = latitude !== "" && longtitude !== "";
+
+    // เคส 1: มี pipe_id → "ตรงกับหน้างาน / ไม่ตรงกับหน้างาน"
+    if (pipeId) {
+      // console.log("เข้า if (มี pipe_id)");
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" }
       );
-    } else if (workRepairDetailReducer.radioPipe == "2") {
+      setPickerData(
+        "processpipes",
+        ["0", "1"].includes(isNotGIS) ? isNotGIS : "0"
+      );
+    }
+
+    // เคส 2: ไม่มี pipe_id แต่ลงจุดแล้ว และต้องการ default เป็น “ไม่มีท่อในระบบ”
+    else if (!pipeId && hasCoordinates) {
+      // console.log("เข้า else if (ไม่มี pipe_id แต่มีพิกัด ลงจุดแล้ว)");
       pickerProcessArrr.push(
         { label: "ไม่มีท่อในระบบ (ท่อจำหน่าย)", value: "2" },
         { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
       );
-    } else {
+      setPickerData(
+        "processpipes",
+        ["2", "3"].includes(isNotGIS) ? isNotGIS : "2"
+      );
+    }
+
+    // เคส 3: ยังไม่ลงจุด, ยังไม่เลือก GIS
+    else {
+      // console.log("เข้า else (ยังไม่ลงจุด หรือยังไม่มีสถานะ GIS)");
       pickerProcessArrr.push(
         { label: "ตรงกับหน้างาน", value: "0" },
         { label: "ไม่ตรงกับหน้างาน", value: "1" },
@@ -417,6 +562,7 @@ export default function WorkCarryRepairScreen(props) {
         { label: "ไม่มีท่อในระบบ (ท่อบริการ/ขามาตร)", value: "3" }
       );
     }
+
     setArrProcessGIS(pickerProcessArrr);
   };
 
@@ -663,7 +809,6 @@ export default function WorkCarryRepairScreen(props) {
         break;
 
       case "ALERT_INSERT_SUCCESS":
-        //console.log("TEST_______");
         setStateAlert(
           1,
           true,
@@ -808,6 +953,7 @@ export default function WorkCarryRepairScreen(props) {
   };
 
   const saveRepairWork = () => {
+
     const params = {
       RWId: props.data.rwId,
       FromProcessDate: formateDateyyyymmdd(dateTime.dateForm),
@@ -831,7 +977,7 @@ export default function WorkCarryRepairScreen(props) {
       HoleLength: holeLength,
       HoleDepth: holeDepth,
     };
-    //console.log("saveRepairWork : ", params);
+
     dispatch(workCarryRepairAction.saveRepairWork(params, settingAlert, props));
   };
 
@@ -929,44 +1075,6 @@ export default function WorkCarryRepairScreen(props) {
       dataSelect = "";
     }
     return dataSelect;
-  };
-
-  const handleSurfaceAppearance = () => {
-    let _filter = "";
-
-    if (props.data.process != null) {
-      if (props.data.process.surfaceAppearance != "") {
-        if (props.data.process.surfaceAppearance == "0") {
-          _filter = "";
-        } else {
-          _filter = props.getSerfaces.filter((val) => {
-            return val.value == props.data.process.surfaceAppearance;
-          });
-        }
-      } else {
-        _filter = "";
-      }
-    } else {
-      _filter = "";
-    }
-
-    return _filter;
-  };
-
-  const handleSizePipe = () => {
-    let _r = "";
-    if (props.data.process != null) {
-      _r = props.data.process.piplineSize;
-    }
-    return _r;
-  };
-
-  const handleProcessPipes = () => {
-    let _r = "";
-    if (props.data.process != null) {
-      _r = props.data.process.isNotGIS;
-    }
-    return _r;
   };
 
   // Begin For Android
@@ -1100,617 +1208,762 @@ export default function WorkCarryRepairScreen(props) {
     }
   };
 
-  const handleRepaireAccountId = () => {
-    let _filter = "";
-    if (props.data.process != null) {
-      if (props.data.process.repaireAccountId != "") {
-        _filter = props.empoyees.filter((val) => {
-          return val.value == props.data.process.repaireAccountId;
-        });
-      } else {
-        _filter = "";
-      }
-    } else {
-      _filter = "";
-    }
-    return _filter;
-  };
-
+  // ปิด SizePipe ถ้าไม่มี Type หรือไม่มี option
   const disSizePipe = () => {
-    let _dis = false;
-    if (toggleCheckedSizePipe == true && checked == true) {
-      _dis = false;
-    } else {
-      _dis = true;
-    }
-
-    return _dis;
+    const isGisMatch = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    const noType = !pickerdVal.tpyofpipes;
+    const noSizeOptions = arrPipeSize.length === 0;
+    return isGisMatch || noType || noSizeOptions;
   };
 
+  // const disSizePipe = () => {
+  //   const noType = !pickerdVal.tpyofpipes; // ยังไม่เลือกชนิดท่อ
+  //   const noSizeOptions = arrPipeSize.length === 0; // ไม่มีตัวเลือกขนาดท่อ
+  //   return noType || noSizeOptions; // ปิดก็ต่อเมื่อไม่มีชนิดท่อ หรือไม่มี options
+  // };
+
+  // ปิด TypePipe ถ้า GIS ยังไม่ได้เลือก
+  // const disableTypePipe = () => {
+  //   const isNotMatchGIS = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+  //   return isNotMatchGIS;
+  // };
+  // const disableTypePipe = () => {
+  //   const allowedValues = ["0", "1", "2", "3"];
+  //   return !allowedValues.includes(pickerdVal.processpipes);
+  // };
+  const disableTypePipe = () => {
+    const isGisMatch = pickerdVal.processpipes === "0"; // ตรงกับหน้างาน
+    return isGisMatch;
+  };
   const disProcesspipes = () => {
     let _dis = false;
     if (
-      workRepairDetailReducer.dataArray.survey.latitude == "" &&
-      workRepairDetailReducer.dataArray.survey.latitude == ""
+      workRepairDetailReducer.dataArray?.survey?.latitude == "" &&
+      workRepairDetailReducer.dataArray?.survey?.latitude == ""
     ) {
       _dis = true;
     } else {
       _dis = false;
     }
-
     return _dis;
   };
 
-  const data = [
-    {
-      title: 'ผู้ซ่อม',
-      component: (
-        <DropDownPicker
-          open={empoyeesPicker}
-          value={pickerdVal.empoyees}
-          items={props.empoyees.map((val) => ({
-            label: val.label,
-            value: val.value,
-          }))}
-          setOpen={setEmpoyeesPicker}
-          onSelectItem={(itemValue) => setPickerData('empoyees', itemValue.value)}
-          placeholder="เลือกผู้ซ่อม"
-        />
-      ),
-    },
-    {
-      title: 'ลักษณะการแตก (รูปแบบแผล)',
-      component: (
-        <DropDownPicker
-          open={leakwoundPicker}
-          value={pickerdVal.leakwound}
-          items={props.getLeakwounds.map((val) => ({
-            label: val.label,
-            value: val.value,
-          }))}
-          setOpen={setLeakwoundPicker}
-          onSelectItem={(itemValue) => setPickerData('leakwound', itemValue.value)}
-          placeholder="เลือกลักษณะการแตก"
-        />
-      ),
-    },
-    {
-      title: 'ลักษณะพื้นผิว',
-      component: (
-        <DropDownPicker
-          open={serfacesPicker}
-          value={pickerdVal.serfaces}
-          items={props.getSerfaces.map((val) => ({
-            label: val.label,
-            value: val.value,
-          }))}
-          setOpen={setSerfacesPicker}
-          onSelectItem={(itemValue) => setPickerData('serfaces', itemValue.value)}
-          placeholder="เลือกลักษณะพื้นผิว"
-        />
-      ),
-    },
-    {
-      title: 'ขนาดหลุม',
-      component: (
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ flex: 2, marginRight: 5 }}>
-            <InputNormal
-              hint="กว้าง"
-              onChangeText={(text) => setHoleWidth(text)}
-              val={holeWidth}
-              color="#2c689e"
-            />
-          </View>
-          <View style={{ flex: 2, marginRight: 5 }}>
-            <InputNormal
-              hint="ยาว"
-              onChangeText={(text) => setHoleLength(text)}
-              val={holeLength}
-              color="#2c689e"
-            />
-          </View>
-          <View style={{ flex: 2, marginRight: 5 }}>
-            <InputNormal
-              hint="ลึก"
-              onChangeText={(text) => setHoleDepth(text)}
-              val={holeDepth}
-              color="#2c689e"
-            />
-          </View>
-        </View>
-      ),
-    },
-  ];
-
-  const getItemCount = () => data.length;
-  const getItem = (data, index) => data[index];
-
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={{ flex: 1 }}>
-        <NativeBaseProvider>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              marginVertical: 10,
-            }}
-          >
-            <View style={{ flex: 1, flexDirection: "row" }}>
-              <View
-                style={{
-                  flex: 1,
-                }}
-              >
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        style={{ backgroundColor: "#FFFFFF" }}
+        nestedScrollEnabled={true}
+      >
+        <View style={workRepairDetailStyle.section}>
+          <NativeBaseProvider>
+            <View
+              style={{
+                paddingHorizontal: 5,
+                paddingVertical: 10,
+                marginBottom: 5,
+                borderLeftWidth: 5,
+                borderColor: "#194f90",
+                backgroundColor: "#f0f0f0",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text style={textsty.text_normal_bold_color_blue}>
+                ระยะเวลาดำเนินการ
+              </Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "column",
+                marginVertical: 10,
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: "row" }}>
                 <View
                   style={{
-                    flexDirection: "row",
-                    marginHorizontal: 10,
-                    justifyContent: "space-between",
+                    flex: 1,
                   }}
                 >
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <Text style={textsty.text_normal_bold}>จาก</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={textsty.text_normal_bold}>เวลา</Text>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        Platform.OS == "ios"
-                          ? setVisibleDateFrom(true)
-                          : showTimePiker(4)
-                      }
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.dateForm}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="calendar-month"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleDateFrom && (
-                      <DatePicker_recive
-                        con={onConfirmDate_Form}
-                        dis={onDismissDate_From}
-                        vis={visibleDateFrom}
-                      />
-                    )}
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        Platform.OS == "ios"
-                          ? setVisibleTimeFrom(true)
-                          : showTimePiker(1);
-                      }}
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.timeFrom}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="clock-time-three"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleTimeFrom && (
-                      <TimePicker_recive
-                        con={onConfirmTime_From}
-                        dis={onDismissTime_From}
-                        vis={visibleTimeFrom}
-                      />
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-            <View style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    marginHorizontal: 10,
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <Text style={textsty.text_normal_bold}>ถึง</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={textsty.text_normal_bold}>เวลา</Text>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        Platform.OS == "ios"
-                          ? setVisibleDateTo(true)
-                          : showTimePiker(5)
-                      }
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.dateTo}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="calendar-month"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleDateTo && (
-                      <DatePicker_recive
-                        con={onConfirmDate_To}
-                        dis={onDismissDate_To}
-                        vis={visibleDateTo}
-                      />
-                    )}
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        Platform.OS == "ios"
-                          ? setVisibleTimeTo(true)
-                          : showTimePiker(2);
-                      }}
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.timeTo}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="clock-time-three"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleTimeTo && (
-                      <TimePicker_recive
-                        con={onConfirmTime_To}
-                        dis={onDismissTime_To}
-                        vis={visibleTimeTo}
-                      />
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-            <View style={{ flex: 1, flexDirection: "row" }}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    marginHorizontal: 10,
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <Text style={textsty.text_normal_bold}>ซ่อมพื้นผิว</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={textsty.text_normal_bold}>เวลา</Text>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        Platform.OS == "ios"
-                          ? setVisibleDateTextTure(true)
-                          : showTimePiker(6)
-                      }
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.dateTextTure}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="calendar-month"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleDateTextTure && (
-                      <DatePicker_recive
-                        con={onConfirmDate_TextTure}
-                        dis={onDismissDate_TextTure}
-                        vis={visibleDateTextTure}
-                      />
-                    )}
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        Platform.OS == "ios"
-                          ? setVisibleTimeTextTure(true)
-                          : showTimePiker(3);
-                      }}
-                    >
-                      <InputNormal
-                        hint="วันที่"
-                        val={dateTime.timeTextTrue}
-                        color="#283593"
-                        dis={false}
-                      />
-                      <View style={WorkCarryRepairStyle.iconDate}>
-                        <MaterialCommunityIcons
-                          name="clock-time-three"
-                          size={30}
-                          color="#283593"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    {visibleTimeTextTure && (
-                      <TimePicker_recive
-                        con={onConfirmTime_TextTure}
-                        dis={onDismissTime_TextTure}
-                        vis={visibleTimeTextTure}
-                      />
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-            <View style={{ height: 30 }} />
-            <View style={othersty.liner} />
-          </View>
-          <View style={{ flex: 1, flexDirection: "column", marginTop: 10 }}>
-            <View style={{ flex: 1 }}>
-              <View
-                style={{
-                  flex: 1,
-                  paddingHorizontal: 10,
-                }}
-              >
-                <Text style={textsty.text_normal_bold}>ผู้ซ่อม</Text>
-                <VStack alignItems="center" space={4}>
-                  <DropDownPicker
-                    open={empoyeesPicker}
-                    value={pickerdVal.empoyees}
-                    items={props.empoyees.map((val) => {
-                      return {
-                        label: val.label,
-                        value: val.value,
-                      };
-                    })}
-                    setOpen={setEmpoyeesPicker}
-                    onSelectItem={(itemValue) => {
-                      setPickerData("empoyees", itemValue.value);
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginHorizontal: 10,
+                      justifyContent: "space-between",
                     }}
-                    placeholder="เลือกผู้ซ่อม"
-                  />
-                </VStack>
-                <HStack alignItems="center" mt={1}>
-                  <Text style={[textsty.text_normal_bold]}>
-                    ลักษณะการแตก (รูปแบบแผล)
+                  >
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <Text style={textsty.text_normal_bold}>จาก</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={textsty.text_normal_bold}>เวลา</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <TouchableOpacity
+                        onPress={() => setVisibleDateFrom(true)}
+                      >
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.dateForm}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="calendar-month"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleDateFrom && (
+                        <DatePicker_recive
+                          con={onConfirmDate_Form}
+                          dis={onDismissDate_From}
+                          vis={visibleDateFrom}
+                        />
+                      )}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setVisibleTimeFrom(true);
+                        }}
+                      >
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.timeFrom}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="clock-time-three"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleTimeFrom && (
+                        <TimePicker_recive
+                          con={onConfirmTime_From}
+                          dis={onDismissTime_From}
+                          vis={visibleTimeFrom}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginHorizontal: 10,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <Text style={textsty.text_normal_bold}>ถึง</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={textsty.text_normal_bold}>เวลา</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <TouchableOpacity onPress={() => setVisibleDateTo(true)}>
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.dateTo}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="calendar-month"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleDateTo && (
+                        <DatePicker_recive
+                          con={onConfirmDate_To}
+                          dis={onDismissDate_To}
+                          vis={visibleDateTo}
+                        />
+                      )}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setVisibleTimeTo(true);
+                        }}
+                      >
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.timeTo}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="clock-time-three"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleTimeTo && (
+                        <TimePicker_recive
+                          con={onConfirmTime_To}
+                          dis={onDismissTime_To}
+                          vis={visibleTimeTo}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={{ flex: 1, flexDirection: "row" }}>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginHorizontal: 10,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <Text style={textsty.text_normal_bold}>ซ่อมพื้นผิว</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={textsty.text_normal_bold}>เวลา</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+                    <View style={{ flex: 1, marginRight: 5 }}>
+                      <TouchableOpacity
+                        onPress={() => setVisibleDateTextTure(true)}
+                      >
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.dateTextTure}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="calendar-month"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleDateTextTure && (
+                        <DatePicker_recive
+                          con={onConfirmDate_TextTure}
+                          dis={onDismissDate_TextTure}
+                          vis={visibleDateTextTure}
+                        />
+                      )}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setVisibleTimeTextTure(true);
+                        }}
+                      >
+                        <InputNormal
+                          hint="วันที่"
+                          val={dateTime.timeTextTrue}
+                          color="#2c689e"
+                          dis={false}
+                        />
+                        <View style={WorkCarryRepairStyle.iconDate}>
+                          <MaterialCommunityIcons
+                            name="clock-time-three"
+                            size={30}
+                            color="#2c689e"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                      {visibleTimeTextTure && (
+                        <TimePicker_recive
+                          con={onConfirmTime_TextTure}
+                          dis={onDismissTime_TextTure}
+                          vis={visibleTimeTextTure}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={{ height: 30 }} />
+              <View style={othersty.liner} />
+            </View>
+            <View style={{ flex: 1, flexDirection: "column", marginTop: 10 }}>
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    paddingHorizontal: 5,
+                    paddingVertical: 10,
+                    marginBottom: 5,
+                    borderLeftWidth: 5,
+                    borderColor: "#194f90",
+                    backgroundColor: "#f0f0f0",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={textsty.text_normal_bold_color_blue}>
+                    รายละเอียดการดำเนินการซ่อม
                   </Text>
-                  <Text style={[textsty.text_request]}>*</Text>
-                </HStack>
-                <VStack alignItems="center" space={4}>
-                  <DropDownPicker
-                    open={leakwoundPicker}
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    paddingHorizontal: 10,
+                  }}
+                >
+                  <Text style={textsty.text_normal_bold}>ผู้ซ่อม</Text>
+                  <Dropdown
+                    style={[
+                      styles.dropdown,
+                      empoyeesisFocus && { borderColor: "#2c689e" },
+                    ]}
+                    placeholderStyle={textsty.text_normal_regular}
+                    selectedTextStyle={textsty.text_normal_regular}
+                    inputSearchStyle={textsty.text_normal_regular}
+                    iconStyle={styles.iconStyle}
+                    data={props.empoyees}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!empoyeesisFocus ? "เลือกผู้ซ่อม" : "..."}
+                    searchPlaceholder="ค้นหา..."
+                    value={pickerdVal.empoyees}
+                    onFocus={() => setEmpoyeesIsFocus(true)}
+                    onBlur={() => setEmpoyeesIsFocus(false)}
+                    onChange={(item) => {
+                      // setValue(item.value);
+                      setPickerData("empoyees", item.value);
+                      setEmpoyeesIsFocus(false);
+                    }}
+                    renderLeftIcon={() =>
+                      pickerdVal.empoyees !== "0" &&
+                      pickerdVal.empoyees !== "" && (
+                        <AntDesign
+                          style={styles.icon}
+                          color="green"
+                          name="check-circle"
+                          size={15}
+                        />
+                      )
+                    }
+                  />
+                  <Text style={textsty.text_normal_bold}>
+                    ลักษณะการแตก (รูปแบบแผล)
+                    <Text style={[textsty.text_request]}>*</Text>
+                  </Text>
+                  <Dropdown
+                    style={[
+                      styles.dropdown,
+                      leakwoundisFocus && { borderColor: "#2c689e" },
+                    ]}
+                    placeholderStyle={textsty.text_normal_regular}
+                    selectedTextStyle={textsty.text_normal_regular}
+                    inputSearchStyle={textsty.text_normal_regular}
+                    iconStyle={styles.iconStyle}
+                    data={props.getLeakwounds.filter(
+                      (item) => item.value !== "99"
+                    )}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={
+                      !leakwoundisFocus ? "เลือกลักษณะการแตก" : "..."
+                    }
+                    searchPlaceholder="ค้นหา..."
                     value={pickerdVal.leakwound}
-                    items={props.getLeakwounds.map((val) => {
-                      return {
-                        label: val.label,
-                        value: val.value,
-                      };
-                    })}
-                    setOpen={setLeakwoundPicker}
-                    onSelectItem={(itemValue) => {
-                      setPickerData("leakwound", itemValue.value);
+                    onFocus={() => setLeakwoundIsFocus(true)}
+                    onBlur={() => setLeakwoundIsFocus(false)}
+                    onChange={(item) => {
+                      // setValue(item.value);
+                      setPickerData("leakwound", item.value);
+                      setLeakwoundIsFocus(false);
                     }}
-                    placeholder="เลือกลักษณะการแตก"
+                    renderLeftIcon={() =>
+                      pickerdVal.leakwound !== "" && (
+                        <AntDesign
+                          style={styles.icon}
+                          color="green"
+                          name="check-circle"
+                          size={15}
+                        />
+                      )
+                    }
                   />
-                </VStack>
-
-                <View style={WorkCarryRepairStyle.space} />
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <HStack alignItems="center">
-                      <Text style={textsty.text_normal_bold}>ชนิดของท่อ</Text>
-                      <Text style={[textsty.text_request]}>*</Text>
-                    </HStack>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <HStack alignItems="center">
-                      <Text style={textsty.text_normal_bold}>ขนาดของท่อ</Text>
-                      <Text style={[textsty.text_request]}>*</Text>
-                    </HStack>
-                  </View>
-                </View>
-
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                  </View>
-                </View>
-                <View style={WorkCarryRepairStyle.space} />
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <HStack alignItems="center">
-                      <Text style={textsty.text_normal_bold}>
-                        สถานะลงจุดซ่อม (GIS)
-                      </Text>
-                      <Text style={[textsty.text_request]}>*</Text>
-                      {checkedLat ? (
+                  <View style={WorkCarryRepairStyle.space} />
+                  <HStack alignItems="center">
+                    <Text style={textsty.text_normal_bold}>ชนิดของท่อ</Text>
+                    <Text style={[textsty.text_request]}>*</Text>
+                  </HStack>
+                  <Dropdown
+                    disable={disableTypePipe()}
+                    style={[
+                      styles.dropdown,
+                      tpyofpipesisFocus && { borderColor: "#2c689e" },
+                      disableTypePipe() && styles.disabledDropdown,
+                    ]}
+                    placeholderStyle={textsty.text_normal_regular}
+                    selectedTextStyle={textsty.text_normal_regular}
+                    inputSearchStyle={textsty.text_normal_regular}
+                    iconStyle={styles.iconStyle}
+                    data={props.getTypeOfPipes}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!tpyofpipesisFocus ? "เลือกชนิด" : "..."}
+                    searchPlaceholder="ค้นหา..."
+                    value={pickerdVal.tpyofpipes}
+                    onFocus={() => setTpyofpipesisFocus(true)}
+                    onBlur={() => setTpyofpipesisFocus(false)}
+                    onChange={(item) => {
+                      // setValue(item.value);
+                      setPickerData("tpyofpipes", item.value);
+                      setTpyofpipesisFocus(false);
+                    }}
+                    renderLeftIcon={() =>
+                      pickerdVal.tpyofpipes && (
+                        <AntDesign
+                          style={styles.icon}
+                          color="green"
+                          name="check-circle"
+                          size={15}
+                        />
+                      )
+                    }
+                  />
+                  <HStack alignItems="center">
+                    <Text style={textsty.text_normal_bold}>ขนาดของท่อ</Text>
+                    <Text style={[textsty.text_request]}>*</Text>
+                  </HStack>
+                  <Dropdown
+                    style={[
+                      styles.dropdown,
+                      sizeofpipesisFocus && { borderColor: "#2c689e" },
+                      disSizePipe() && styles.disabledDropdown,
+                    ]}
+                    placeholderStyle={textsty.text_normal_regular}
+                    selectedTextStyle={textsty.text_normal_regular}
+                    inputSearchStyle={textsty.text_normal_regular}
+                    iconStyle={styles.iconStyle}
+                    data={arrPipeSize}
+                    search
+                    // maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!sizeofpipesisFocus ? "เลือกขนาด" : "..."}
+                    searchPlaceholder="ค้นหา..."
+                    value={pickerdVal.sizeofpipes}
+                    disable={disSizePipe()}
+                    onFocus={() => setSizeofpipesisFocus(true)}
+                    onBlur={() => setSizeofpipesisFocus(false)}
+                    onChange={(item) => {
+                      // setValue(item.value);
+                      setPickerData("sizeofpipes", item.value);
+                      setSizeofpipesisFocus(false);
+                    }}
+                    renderLeftIcon={() =>
+                      pickerdVal.sizeofpipes && (
+                        <AntDesign
+                          style={styles.icon}
+                          color="green"
+                          name="check-circle"
+                          size={15}
+                        />
+                      )
+                    }
+                  />
+                  <View style={WorkCarryRepairStyle.space} />
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={{ flex: 2, marginRight: 5 }}>
+                      <HStack alignItems="center">
                         <Text style={textsty.text_normal_bold}>
-                          กรุณาลงจุดซ่อม
+                          สถานะลงจุดซ่อม (GIS)
                         </Text>
-                      ) : null}
-                    </HStack>
+                        <Text style={[textsty.text_request]}>*</Text>
+                        {!checkedLat ? (
+                          <Text style={textsty.text_normal_bold}>
+                            กรุณาลงจุดซ่อม
+                          </Text>
+                        ) : null}
+                      </HStack>
+                    </View>
                   </View>
-                </View>
-                <View style={{ flexDirection: "column" }}>
-                </View>
-                <View style={WorkCarryRepairStyle.space} />
-                <Text style={textsty.text_normal_bold}>ลักษณะพื้นผิว</Text>
-                <VStack alignItems="center" space={4}>
-                  <DropDownPicker
-                    open={serfacesPicker}
+                  <View style={{ flexDirection: "column" }}>
+                    <Dropdown
+                      disable={!checkedLat}
+                      style={[
+                        styles.dropdown,
+                        processGISisFocus && { borderColor: "#2c689e" },
+                        !checkedLat && styles.disabledDropdown,
+                      ]}
+                      placeholderStyle={textsty.text_normal_regular}
+                      selectedTextStyle={textsty.text_normal_regular}
+                      inputSearchStyle={textsty.text_normal_regular}
+                      iconStyle={styles.iconStyle}
+                      data={arrProcessGIS}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={"เลือกสถานะลงจุดซ่อม (GIS)"}
+                      searchPlaceholder="ค้นหา..."
+                      value={pickerdVal.processpipes}
+                      disabled={disProcesspipes()}
+                      onFocus={() => setProcessGISisFocus(true)}
+                      onBlur={() => setProcessGISisFocus(false)}
+                      onChange={(item) => {
+                        // setValue(item.value);
+                        setPickerData("processpipes", item.value);
+                        setProcessGISisFocus(false);
+                      }}
+                      renderLeftIcon={() =>
+                        pickerdVal.processpipes != "" && (
+                          <AntDesign
+                            style={styles.icon}
+                            color="green"
+                            name="check-circle"
+                            size={15}
+                          />
+                        )
+                      }
+                    />
+                  </View>
+                  <View style={WorkCarryRepairStyle.space} />
+                  <Text style={textsty.text_normal_bold}>ลักษณะพื้นผิว</Text>
+                  <Dropdown
+                    style={[
+                      styles.dropdown,
+                      isFocus && { borderColor: "blue" },
+                    ]}
+                    placeholderStyle={textsty.text_normal_regular}
+                    selectedTextStyle={textsty.text_normal_regular}
+                    inputSearchStyle={textsty.text_normal_regular}
+                    iconStyle={styles.iconStyle}
+                    data={props.getSerfaces}
+                    search
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={!isFocus ? "ลักษณะพื้นผิว" : "..."}
+                    searchPlaceholder="ค้นหา..."
                     value={pickerdVal.serfaces}
-                    items={props.getSerfaces.map((val) => {
-                      return {
-                        label: val.label,
-                        value: val.value,
-                      };
-                    })}
-                    setOpen={setSerfacesPicker}
-                    onSelectItem={(itemValue) => {
-                      setPickerData("serfaces", itemValue.value);
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={(item) => {
+                      // setValue(item.value);
+                      setPickerData("serfaces", item.value);
+                      setIsFocus(false);
                     }}
-                    placeholder="เลือกลักษณะพื้นผิว"
+                    renderLeftIcon={() =>
+                      pickerdVal.serfaces !== "0" &&
+                      pickerdVal.serfaces !== "" && (
+                        <AntDesign
+                          style={styles.icon}
+                          color="green"
+                          name="check-circle"
+                          size={15}
+                        />
+                      )
+                    }
                   />
-                </VStack>
-                <View style={WorkCarryRepairStyle.space} />
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <Text style={textsty.text_normal_bold}>ขนาดหลุม</Text>
+                  <View style={WorkCarryRepairStyle.space} />
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={{ flex: 2, marginRight: 5 }}>
+                      <Text style={textsty.text_normal_bold}>
+                        ขนาดหลุม (เมตร)
+                      </Text>
+                    </View>
                   </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <InputNormal
-                      hint="กว้าง"
-                      onChangeText={(text) => setHoleWidth(text)}
-                      val={holeWidth}
-                      color="#2c689e"
-                    />
-                  </View>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <InputNormal
-                      hint="ยาว"
-                      onChangeText={(text) => setHoleLength(text)}
-                      val={holeLength}
-                      color="#2c689e"
-                    />
-                  </View>
-                  <View style={{ flex: 2, marginRight: 5 }}>
-                    <InputNormal
-                      hint="ลึก"
-                      onChangeText={(text) => setHoleDepth(text)}
-                      val={holeDepth}
-                      color="#2c689e"
-                    />
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={{ flex: 2, marginRight: 5 }}>
+                      <InputNormal
+                        typeOfInput="decimal"
+                        hint="กว้าง"
+                        onChangeText={(text) => setHoleWidth(text)}
+                        val={holeWidth}
+                        color="#2c689e"
+                      />
+                    </View>
+                    <View style={{ flex: 2, marginRight: 5 }}>
+                      <InputNormal
+                        typeOfInput="decimal"
+                        hint="ยาว"
+                        onChangeText={(text) => setHoleLength(text)}
+                        val={holeLength}
+                        color="#2c689e"
+                      />
+                    </View>
+                    <View style={{ flex: 2, marginRight: 5 }}>
+                      <InputNormal
+                        typeOfInput="decimal"
+                        hint="ลึก"
+                        onChangeText={(text) => setHoleDepth(text)}
+                        val={holeDepth}
+                        color="#2c689e"
+                      />
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
-          </View>
-          <View style={{ height: 10 }} />
-          <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                backgroundColor: "#f57c00",
-                height: 35,
-                borderRadius: 10,
-                borderColor: "#f57c00",
-                marginTop: 20,
-                borderWidth: 1,
-                marginRight: 10,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                settingAlert("ALERT_CLOSE_WORK_REPAIR");
-              }}
-            >
-              <Text style={[textsty.text_normal_bold, { color: "white" }]}>
-                ปิดงานซ่อม
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                backgroundColor: "#2c689e",
-                height: 35,
-                borderRadius: 10,
-                borderColor: "#2c689e",
-                marginTop: 20,
-                borderWidth: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                settingAlert("ALERT_CONFIRM_SAVE_RESULT");
-              }}
-            >
-              <Text style={[textsty.text_normal_bold, { color: "white" }]}>
-                บันทึกผล
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </NativeBaseProvider>
-        <LoadingSpinner
-          visible={visibleLoading}
-          textContent="กำลังโหลด"
-          animation={"fade"}
-          color={"#0000ff"}
-        />
-        <LoadingSpinner
-          visible={isLoaddingSave}
-          textContent="กำลังบันทึก"
-          animation={"fade"}
-          color={"#0000ff"}
-        />
-        <Awesome
-          visible={visibleAlert}
-          titleIcon={customAlert.titleIcon}
-          showConfirmButton={customAlert.showConfirmButton}
-          showCancelButton={customAlert.showCancelButton}
-          textBody={customAlert.textBody}
-          confirmText={customAlert.confirmText}
-          cancelText={customAlert.cancelText}
-          onConfirmPress={customAlert.onConfirmPress}
-          onCancelPress={customAlert.onCancelPress}
-        />
-        {show && <DateTimePickker />}
-      </View>
-    </ScrollView>
+            <View style={{ height: 10 }} />
+            <View style={{ flexDirection: "row", marginHorizontal: 10 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: "#f57c00",
+                  height: 35,
+                  borderRadius: 10,
+                  borderColor: "#f57c00",
+                  marginTop: 20,
+                  borderWidth: 1,
+                  marginRight: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  settingAlert("ALERT_CLOSE_WORK_REPAIR");
+                }}
+              >
+                <Text style={[textsty.text_normal_bold, { color: "white" }]}>
+                  ปิดงานซ่อม
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: "#2c689e",
+                  height: 35,
+                  borderRadius: 10,
+                  borderColor: "#2c689e",
+                  marginTop: 20,
+                  borderWidth: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  settingAlert("ALERT_CONFIRM_SAVE_RESULT");
+                }}
+              >
+                <Text style={[textsty.text_normal_bold, { color: "white" }]}>
+                  บันทึกผล
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ height: 100 }} />
+          </NativeBaseProvider>
+          <LoadingSpinner
+            visible={visibleLoading}
+            textContent="กำลังโหลด"
+            animation={"fade"}
+            color={"#0000ff"}
+          />
+          <LoadingSpinner
+            visible={isLoaddingSave}
+            textContent="กำลังบันทึก"
+            animation={"fade"}
+            color={"#0000ff"}
+          />
+          <Awesome
+            visible={visibleAlert}
+            titleIcon={customAlert.titleIcon}
+            showConfirmButton={customAlert.showConfirmButton}
+            showCancelButton={customAlert.showCancelButton}
+            textBody={customAlert.textBody}
+            confirmText={customAlert.confirmText}
+            cancelText={customAlert.cancelText}
+            onConfirmPress={customAlert.onConfirmPress}
+            onCancelPress={customAlert.onCancelPress}
+          />
+          {show && <DateTimePickker />}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    padding: 16,
+  },
+  dropdown: {
+    height: 40,
+    borderColor: "#2c689e",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "white",
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  set: {
+    backgroundColor: "#59d090",
+    borderColor: "#59d090",
+  },
+  disabledDropdown: {
+    backgroundColor: "#e0e0e0", // เทาอ่อน
+    borderColor: "#bdbdbd", // เทาเข้ม
+  },
+});

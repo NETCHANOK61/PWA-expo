@@ -38,8 +38,7 @@ export default function WorkRepairScreen(props) {
   const dataArray = workRepairReducer?.dataArray || [];
   const [rwId, setRwId] = useState("");
   const [isLoadding, setIsLoadding] = useState(false);
-  // const [isCheckData, setIsCheckData] = useState(false);
-  const [isFirstLoadDone, setIsFirstLoadDone] = useState(false);
+  const [isCheckData, setIsCheckData] = useState(false);
   const [visibleLoading, setVisibleLoading] = useState(false);
 
   const setStateToLogin = (payload) => ({
@@ -58,22 +57,66 @@ export default function WorkRepairScreen(props) {
     };
   };
 
+  // useEffect(() => {
+  //   // const unsubscribe = props.navigation.addListener("focus", () => {
+  //   //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
+  //   //   dispatch(
+  //   //     SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //   //   );
+  //   // });
+
+  //   // return unsubscribe;
+  //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
+  //   dispatch(
+  //     SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //   );
+  //   console.log("WorkRepairScreen");
+  // }, [reduxSearchParams]); // 💥 สำคัญ! ต้องใส่ reduxSearchParams
+
+  // useEffect(() => {
+  //   const unsubscribe = props.navigation.addListener("focus", () => {
+  //     init();
+  //     dispatch(
+  //       SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //     );
+  //   });
+
+  //   return unsubscribe;
+  // }, []);
+
   useEffect(() => {
-    setIsLoadding(true); // เปิดโหลดทันที
     init();
     dispatch(
       SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
     );
   }, [reduxSearchParams]);
 
-  useEffect(() => {
-    if (dataArray.length > 0) {
-      setIsLoadding(false);
-    }
-  }, [dataArray]);
+  // const init = async () => {
+  //   const profileUserData = await getProfile();
+  //   dispatch(setStateToLogin(profileUserData));
+  //   await dispatch(workCarryRepairAction.loadPiker());
 
+  //   const searchParamsToUse = reduxSearchParams || createDefaultSearchParams();
+
+  //   await dispatch(
+  //     workRepairAction.loadDataWitchPost(searchParamsToUse, props)
+  //   );
+  //   setIsLoadding(false);
+
+  //   const unsubscribe = navigation.addListener("focus", () => {
+  //     dispatch(
+  //       SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+  //     );
+  //   });
+  //   setIsCheckData(false);
+  //   return () => {
+  //     unsubscribe;
+  //   };
+  // };
   const init = async () => {
+    if (isLoadding) return;
     setIsLoadding(true);
+
     const profileUserData = await getProfile();
     dispatch(setStateToLogin(profileUserData));
     await dispatch(workCarryRepairAction.loadPiker());
@@ -84,7 +127,7 @@ export default function WorkRepairScreen(props) {
     );
 
     setIsLoadding(false);
-    setIsFirstLoadDone(true); // ✅ ใช้เป็น flag ว่าโหลดรอบแรกเสร็จแล้ว
+    setIsCheckData(false);
   };
 
   const formatDate = (date) => {
@@ -425,6 +468,42 @@ export default function WorkRepairScreen(props) {
     return render;
   };
 
+  // const emptyData = () => (
+  //   <View
+  //     style={{
+  //       flex: 1,
+  //       flexDirection: 'column',
+  //       alignItems: 'center',
+  //       justifyContent: 'center',
+  //     }}>
+  //     <Text style={[textsty.text_xl_bold_color_blue, { opacity: 0.3 }]}>
+  //       ไม่พบข้อมูล
+  //     </Text>
+  //     <MaterialCommunityIcons
+  //       name="delete-empty-outline"
+  //       size={0.15 * viewportHeight}
+  //       color="rgba(44,104,158,0.2);"
+  //     />
+  //   </View>
+  // );
+
+  // const refresh = () => {
+  //   dispatch(workRepairAction.loadDataWitchPost(props));
+  //   if (dataArray.length == 0) {
+  //     setIsLoadding(true);
+  //   } else {
+  //     setIsLoadding(false);
+  //   }
+  // };
+
+  // const onreloaddata = () => {
+  //   setReLoadingData(true);
+  //   setTimeout(() => {
+  //     dispatch(workRepairAction.loadDataWitchPost(props));
+  //     setReLoadingData(false);
+  //   }, 1500);
+  // };
+
   // ฟังก์ชัน refresh ก็ดึงจาก local searchParams เสมอ
   const refresh = () => {
     dispatch(workRepairAction.loadDataWitchPost(reduxSearchParams, props));
@@ -472,15 +551,7 @@ export default function WorkRepairScreen(props) {
             <ActivityIndicator size={"large"} />
           </Box>
         ) : null}
-        {isLoadding && !isFirstLoadDone ? (
-          <Box
-            alignSelf={"center"}
-            mt={0.08 * viewportHeight}
-            position={"absolute"}
-          >
-            <ActivityIndicator size={"large"} />
-          </Box>
-        ) : dataArray.length === 0 && isFirstLoadDone ? (
+        {dataArray.length == 0 && isLoadding == true && isCheckData == false ? (
           <Box flex={1} justifyContent={"center"} alignItems={"center"}>
             <Text style={[textsty.text_xl_bold_color_blue, { opacity: 0.3 }]}>
               {"ไม่พบข้อมูล"}
@@ -488,7 +559,7 @@ export default function WorkRepairScreen(props) {
             <MaterialCommunityIcons
               name="delete-empty-outline"
               size={0.13 * viewportHeight}
-              color="rgba(44,104,158,0.2)"
+              color="rgba(44,104,158,0.2);"
             />
             <TouchableOpacity
               style={{
@@ -498,9 +569,8 @@ export default function WorkRepairScreen(props) {
                 paddingHorizontal: 5,
                 borderRadius: 5,
                 opacity: 0.9,
-                marginTop: 15,
               }}
-              onPress={init}
+              onPress={onreloaddata}
             >
               <MaterialCommunityIcons
                 name="reload"
@@ -519,16 +589,17 @@ export default function WorkRepairScreen(props) {
           </Box>
         ) : (
           <FlatList
+            refreshing={workRepairReducer.isFetching}
+            onRefresh={refresh}
             data={dataArray}
             renderItem={renderRow}
             keyExtractor={(item, index) => item.rwCode || index.toString()}
-            onRefresh={init}
-            refreshing={isLoadding}
-            initialNumToRender={20}
-            maxToRenderPerBatch={50}
-            windowSize={21}
-            removeClippedSubviews={false}
+            pagingEnabled={false}
             showsVerticalScrollIndicator={false}
+            onEndThreshold={50}
+            removeClippedSubviews={false}
+            initialNumToRender={10}
+            windowSize={10}
           />
         )}
         <BottomSheet

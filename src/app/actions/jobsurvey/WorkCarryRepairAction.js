@@ -64,6 +64,7 @@ export const rememViewWorkCarryRepair = obj => {
 };
 
 export const loadPiker = (brokenAppearanceText) => {
+  // console.log("loadPiker", brokenAppearanceText)
   return async dispatch => {
     try {
       Promise.all([
@@ -90,6 +91,7 @@ export const loadPiker = (brokenAppearanceText) => {
             getRequestCategorySubject,
             getLeakWounds
           };
+          // console.log(data_list.getLeakWounds)
           dispatch(setStateListPiker(data_list));
         },
       );
@@ -100,7 +102,6 @@ export const loadPiker = (brokenAppearanceText) => {
 };
 
 export const getSizeOfPipes = key => {
-  console.log("getSizeOfPipes", key)
   return async dispatch => {
     try {
       await serviveFetch('GET', url.getSizeOfPipes + '/' + key).then(data => {

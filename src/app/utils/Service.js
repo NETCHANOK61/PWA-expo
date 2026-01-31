@@ -33,7 +33,7 @@ export const checkedToken = (error, props) => {
       {
         text: 'ตกลง',
         onPress: () => {
-          navigation.reset({
+          props.navigation.reset({
             index: 0,
             routes: [
               {

@@ -1,4 +1,3 @@
-// WorkRepairScreen.js
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -7,93 +6,72 @@ import {
   FlatList,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Box, NativeBaseProvider } from "native-base";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { BottomSheet, ListItem } from "react-native-elements";
-import { ACTION_LOGIN } from "../../Constants";
-import { getProfile } from "../../utils/Storage";
 import textsty from "../../styles/TextStyle";
 import styles from "../../styles/WorkRepairStyle";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
-
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import * as workRepairAction from "../../actions/workrepair/WorkRepairAction";
+import * as workRepairDetailAction from "../../actions/workrepair/WorkRepairDetailAction";
 import * as workCarryRepairAction from "../../actions/jobsurvey/WorkCarryRepairAction";
 import * as SaveLocationPointNormalAction from "../../actions/jobsurvey/SaveLocationPointNormalAction";
-import * as workRepairDetailAction from "../../actions/workrepair/WorkRepairDetailAction";
 
 const { width: viewportWidth, height: viewportHeight } =
   Dimensions.get("window");
 
 export default function WorkRepairScreen(props) {
-  const dispatch = useDispatch();
   const workRepairReducer = useSelector((state) => state.workRepairReducer);
-  const reduxSearchParams = useSelector(
-    (state) => state.repairFilterReducer.searchParams
-  );
-
+  const dispatch = useDispatch();
   const [isVisible, setIsVisible] = useState(false);
-  const dataArray = workRepairReducer?.dataArray || [];
   const [rwId, setRwId] = useState("");
-  const [isLoadding, setIsLoadding] = useState(false);
-  // const [isCheckData, setIsCheckData] = useState(false);
-  const [isFirstLoadDone, setIsFirstLoadDone] = useState(false);
   const [visibleLoading, setVisibleLoading] = useState(false);
+  const [reLoadingData, setReLoadingData] = useState(false);
+  const [isLoadding, setIsLoadding] = useState(false);
+  const [isCheckData, setIsCheckData] = useState(false);
 
   const setStateToLogin = (payload) => ({
     type: ACTION_LOGIN,
     payload,
   });
 
-  const createDefaultSearchParams = () => {
-    const today = new Date();
-    const fromDate = new Date();
-    fromDate.setDate(today.getDate() - 3);
-    const formatDate = (date) => date.toISOString().split("T")[0];
-    return {
-      FromDate: formatDate(fromDate),
-      ToDate: formatDate(today),
+  const init = async (navigation) => {
+    setIsCheckData(true);
+    await dispatch(workCarryRepairAction.loadPiker());
+    await dispatch(workRepairAction.loadDataWitchPost(props));
+
+    if (workRepairReducer.dataArray.length == 0) {
+      setIsLoadding(true);
+    } else {
+      setIsLoadding(false);
+    }
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(
+        SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
+      );
+    });
+    setIsCheckData(false);
+    return () => {
+      unsubscribe;
     };
   };
 
   useEffect(() => {
-    setIsLoadding(true); // เปิดโหลดทันที
-    init();
-    dispatch(
-      SaveLocationPointNormalAction.setStateSaveLocationPointNormalFailed()
-    );
-  }, [reduxSearchParams]);
-
-  useEffect(() => {
-    if (dataArray.length > 0) {
-      setIsLoadding(false);
-    }
-  }, [dataArray]);
-
-  const init = async () => {
-    setIsLoadding(true);
-    const profileUserData = await getProfile();
-    dispatch(setStateToLogin(profileUserData));
-    await dispatch(workCarryRepairAction.loadPiker());
-
-    const searchParamsToUse = reduxSearchParams || createDefaultSearchParams();
-    await dispatch(
-      workRepairAction.loadDataWitchPost(searchParamsToUse, props)
-    );
-
-    setIsLoadding(false);
-    setIsFirstLoadDone(true); // ✅ ใช้เป็น flag ว่าโหลดรอบแรกเสร็จแล้ว
-  };
+    init(props.navigation);
+  }, [props.navigation]);
 
   const formatDate = (date) => {
     const d = new Date(date);
-    let month = "" + (d.getMonth() + 1);
-    let day = "" + d.getDate();
-    const year = d.getFullYear();
+    let month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
+
     if (month.length < 2) month = "0" + month;
     if (day.length < 2) day = "0" + day;
+
     return [day, month, year].join("/");
   };
 
@@ -425,22 +403,39 @@ export default function WorkRepairScreen(props) {
     return render;
   };
 
-  // ฟังก์ชัน refresh ก็ดึงจาก local searchParams เสมอ
+  // const emptyData = () => (
+  //   <View
+  //     style={{
+  //       flex: 1,
+  //       flexDirection: 'column',
+  //       alignItems: 'center',
+  //       justifyContent: 'center',
+  //     }}>
+  //     <Text style={[textsty.text_xl_bold_color_blue, { opacity: 0.3 }]}>
+  //       ไม่พบข้อมูล
+  //     </Text>
+  //     <MaterialCommunityIcons
+  //       name="delete-empty-outline"
+  //       size={0.15 * viewportHeight}
+  //       color="rgba(44,104,158,0.2);"
+  //     />
+  //   </View>
+  // );
+
   const refresh = () => {
-    dispatch(workRepairAction.loadDataWitchPost(reduxSearchParams, props));
-    setIsLoadding(dataArray.length === 0);
+    dispatch(workRepairAction.loadDataWitchPost(props));
+    if (workRepairReducer.dataArray.length == 0) {
+      setIsLoadding(true);
+    } else {
+      setIsLoadding(false);
+    }
   };
 
   const onreloaddata = () => {
-    setVisibleLoading(true);
+    setReLoadingData(true);
     setTimeout(() => {
-      const usedParams =
-        reduxSearchParams?.FromDate && reduxSearchParams?.ToDate
-          ? reduxSearchParams
-          : createDefaultSearchParams();
-
-      dispatch(workRepairAction.loadDataWitchPost(props, usedParams));
-      setVisibleLoading(false);
+      dispatch(workRepairAction.loadDataWitchPost(props));
+      setReLoadingData(false);
     }, 1500);
   };
 
@@ -460,7 +455,7 @@ export default function WorkRepairScreen(props) {
               { color: "#ffffff", fontSize: 0.016 * viewportHeight },
             ]}
           >
-            {"จำนวนทั้งหมด " + dataArray.length + " รายการ"}
+            {"จำนวนทั้งหมด " + workRepairReducer.dataArray.length + " รายการ"}
           </Text>
         </Box>
         {visibleLoading == true ? (
@@ -472,15 +467,9 @@ export default function WorkRepairScreen(props) {
             <ActivityIndicator size={"large"} />
           </Box>
         ) : null}
-        {isLoadding && !isFirstLoadDone ? (
-          <Box
-            alignSelf={"center"}
-            mt={0.08 * viewportHeight}
-            position={"absolute"}
-          >
-            <ActivityIndicator size={"large"} />
-          </Box>
-        ) : dataArray.length === 0 && isFirstLoadDone ? (
+        {workRepairReducer.dataArray.length == 0 &&
+        isLoadding == true &&
+        isCheckData == false ? (
           <Box flex={1} justifyContent={"center"} alignItems={"center"}>
             <Text style={[textsty.text_xl_bold_color_blue, { opacity: 0.3 }]}>
               {"ไม่พบข้อมูล"}
@@ -488,7 +477,7 @@ export default function WorkRepairScreen(props) {
             <MaterialCommunityIcons
               name="delete-empty-outline"
               size={0.13 * viewportHeight}
-              color="rgba(44,104,158,0.2)"
+              color="rgba(44,104,158,0.2);"
             />
             <TouchableOpacity
               style={{
@@ -498,9 +487,8 @@ export default function WorkRepairScreen(props) {
                 paddingHorizontal: 5,
                 borderRadius: 5,
                 opacity: 0.9,
-                marginTop: 15,
               }}
-              onPress={init}
+              onPress={onreloaddata}
             >
               <MaterialCommunityIcons
                 name="reload"
@@ -519,16 +507,17 @@ export default function WorkRepairScreen(props) {
           </Box>
         ) : (
           <FlatList
-            data={dataArray}
+            refreshing={workRepairReducer.isFetching}
+            onRefresh={refresh}
+            data={workRepairReducer.dataArray}
             renderItem={renderRow}
             keyExtractor={(item, index) => item.rwCode || index.toString()}
-            onRefresh={init}
-            refreshing={isLoadding}
-            initialNumToRender={20}
-            maxToRenderPerBatch={50}
-            windowSize={21}
-            removeClippedSubviews={false}
+            pagingEnabled={false}
             showsVerticalScrollIndicator={false}
+            onEndThreshold={50}
+            removeClippedSubviews={false}
+            initialNumToRender={10}
+            windowSize={10}
           />
         )}
         <BottomSheet

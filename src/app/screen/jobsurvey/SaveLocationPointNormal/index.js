@@ -28,11 +28,13 @@ import {
 import { getProfile } from "../../../utils/Storage";
 import * as saveLocationPointNormalAction from "../../../actions/jobsurvey/SaveLocationPointNormalAction";
 import { setStateRadioPipe } from "../../../actions/workrepair/WorkRepairDetailAction";
+import * as workRepairAction from "../../../actions/workrepair/WorkRepairAction";
 import {
   checkLocationAccept,
   requestLocationAccept,
 } from "../../../utils/permissionsDevice";
 import { Ionicons } from "@expo/vector-icons";
+import store from "../../../store/store";
 
 export default function Savelocation(props) {
   const dispatch = useDispatch();
@@ -64,6 +66,7 @@ export default function Savelocation(props) {
   const workRepairDetailReducer = useSelector(
     (state) => state.workRepairDetailReducer
   );
+
 
   const init = async (isFocused) => {
     let checkPermissions = await checkLocationAccept();
@@ -111,9 +114,10 @@ export default function Savelocation(props) {
   };
 
   const handlerCaseLocation = () => {
-    console.log('data', workRepairDetailReducer.dataArray);
+    //console.log('pipe_id', workRepairDetailReducer.dataArray.survey.pipe_id);
     //  setMapSnapValue('1');
     //  setValueMapSnap('1');
+    // console.log("pipe_id",workRepairDetailReducer.dataArray)
     if (workRepairDetailReducer.dataArray.survey != null) {
       if (
         workRepairDetailReducer.dataArray.survey.latitude &&
@@ -197,9 +201,36 @@ export default function Savelocation(props) {
           "",
           () => {
             setVisibleAlert(false);
+            // // ✅ เพิ่ม dispatch โหลดข้อมูลใหม่
+            // dispatch(workRepairAction.loadDataWitchPost(props));
+
             setTimeout(() => {
               props.navigation.goBack();
             }, 800);
+
+            dispatch(
+              workRepairAction.loadDataWitchPost(props, () => {
+                const rwId = props.route.params.data.rwId;
+                const list = store.getState().workRepairReducer.dataArray;
+                const item = list.find((e) => e.rwId === rwId);
+                // console.log("list", list);
+                // console.log("looking for rwId:", rwId);
+                // console.log(
+                //   "all rwId in list:",
+                //   list.map((e) => e.rwId)
+                // );
+                if (item) {
+                  dispatch({
+                    type: "ACTION_GETREPAIRWORKBYID_SUCCESS",
+                    payload: item,
+                  });
+                }
+
+                // กลับหน้าก่อนหน้าหรือทำอะไรก็ได้
+                setVisibleAlert(false);
+                props.navigation.goBack();
+              })
+            );
           },
           () => {}
         );
@@ -275,7 +306,6 @@ export default function Savelocation(props) {
     const _mapSnap = await getValueMapSnap();
     const _viewShot = await capture();
 
-    // console.log("_mapSnap",_mapSnap)
     dispatch(setStateRadioPipe(_mapSnap));
 
     dispatch(
@@ -442,8 +472,8 @@ export default function Savelocation(props) {
             latSurvey={handleLatSurvey()}
             lngSurvey={handleLntSurvey()}
             caseLoacation={{
-              caseLat: props.route.params.data.incidents[0].caseLatitude,
-              castLng: props.route.params.data.incidents[0].caseLongtitude,
+              caseLat: props.route.params.data.incidents?.[0]?.caseLatitude ?? "",
+              castLng: props.route.params.data.incidents?.[0]?.caseLongtitude ?? "",
             }}
             onClickSave={(value, _latitude, _longitude) => {
               handleSetMapParameter(value, _latitude, _longitude);

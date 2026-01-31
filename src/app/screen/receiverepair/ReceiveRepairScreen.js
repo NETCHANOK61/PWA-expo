@@ -23,15 +23,19 @@ import * as receiveRepairDetailAction from "../../actions/receiverepair/ReceiveR
 export default function ReceiveRepairScreen(props) {
   const dispatch = useDispatch();
   const receiveRepairReducer = useSelector((state) => {
-    // console.log("receiveRepairReducer", state);  // Log the entire state to check its structure
     return state.receiveRepairReducer;
   });
+  const reduxSearchParams = useSelector(
+    (state) => state.repairFilterReducer.searchParams
+  );
+
   const dataArray = receiveRepairReducer?.dataArray || [];
   const [isLoadding, setIsLoadding] = useState(false);
   const [isCheckData, setIsCheckData] = useState(false);
   const [visibleLoading, setVisibleLoading] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   //const [isRefreshing, setIsRefreshing] = useState(true);
+  // const [searchParams, setSearchParams] = useState(null);
   const { width: viewportWidth, height: viewportHeight } =
     Dimensions.get("window");
 
@@ -40,23 +44,49 @@ export default function ReceiveRepairScreen(props) {
     payload,
   });
 
-  const init = async (navigation) => {
-    let profileUserData = await getProfile();
+  // ฟังก์ชันช่วยสร้าง default searchParams (ย้อนหลัง 3 วันถึงวันนี้)
+  const createDefaultSearchParams = () => {
+    const today = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(today.getDate() - 3);
+
+    // แปลงเป็น string ตามรูปแบบ yyyy-MM-dd หรือรูปแบบที่ backend ต้องการ
+    const formatDate = (date) => date.toISOString().split("T")[0]; // "2025-06-05"
+
+    return {
+      FromDate: formatDate(fromDate),
+      ToDate: formatDate(today),
+    };
+  };
+
+  const init = async () => {
+    const profileUserData = await getProfile();
     dispatch(setStateToLogin(profileUserData));
 
-    await dispatch(jsonActions.loadDataWitchPost(props));
-    setIsCheckData(true);
-    if (dataArray.length == 0) {
-      setIsLoadding(true);
+    if (reduxSearchParams?.FromDate && reduxSearchParams?.ToDate) {
+      await dispatch(jsonActions.loadDataWitchPost(reduxSearchParams, props));
     } else {
-      setIsLoadding(false);
+      // หาก redux ยังไม่มี filter เลย (เข้าใหม่ครั้งแรก)
+      const defaultParams = createDefaultSearchParams();
+      await dispatch(jsonActions.loadDataWitchPost(defaultParams, props));
+
+      // ✨ เซ็ตค่า default ลง redux ด้วย ถ้ามี reducer รองรับ
+      // dispatch(setSearchParams(defaultParams));
     }
+
+    setIsCheckData(true);
+    setIsLoadding(dataArray.length === 0);
     setIsCheckData(false);
   };
 
   useEffect(() => {
-    init(props.navigation);
-  }, [props.navigation]);
+    // const unsubscribe = props.navigation.addListener("focus", () => {
+    //   init(); // โหลดใหม่ทุกครั้งที่ user กลับมาหน้านี้
+    // });
+
+    // return unsubscribe;
+    init();
+  }, [reduxSearchParams]); // 💥 สำคัญ! ต้องใส่ reduxSearchParams
 
   const title = {
     no: "เลขที่รับเเจ้ง : ",
@@ -238,19 +268,20 @@ export default function ReceiveRepairScreen(props) {
   //   </View>
   // );
 
+  // ฟังก์ชัน refresh ก็ดึงจาก local searchParams เสมอ
   const refresh = () => {
-    dispatch(jsonActions.loadDataWitchPost(props));
-    if (dataArray.length == 0) {
-      setIsLoadding(true);
-    } else {
-      setIsLoadding(false);
-    }
+    dispatch(jsonActions.loadDataWitchPost(reduxSearchParams, props));
+    setIsLoadding(dataArray.length === 0);
   };
 
   const onreloaddata = () => {
     setVisibleLoading(true);
     setTimeout(() => {
-      dispatch(jsonActions.loadDataWitchPost(props));
+      const usedParams =
+        reduxSearchParams && reduxSearchParams.FromDate
+          ? reduxSearchParams
+          : createDefaultSearchParams();
+      dispatch(jsonActions.loadDataWitchPost(usedParams, props));
       setVisibleLoading(false);
     }, 1500);
   };

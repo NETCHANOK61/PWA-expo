@@ -126,11 +126,15 @@ const ReceiveRepairStackScreen = ({ navigation, route }) => {
           headerRight: () => (
             <TouchableOpacity
               activeOpacity={0.1}
-              onPress={async () => {
+              onPress={() => {
                 navigation.navigate("ReceiveRepair", {
                   screen: "ReceiveRepairSearchScreen",
+                  params: {
+                    backTab: "ReceiveRepair",
+                    backScreen: "ReceiveRepairScreen",
+                    prevFilter: route.params?.filterResult,
+                  },
                 });
-                // dispatch(repairFilterAction.inncidentSearch(navigation));
               }}
               style={{ padding: 10 }}
             >
@@ -290,8 +294,16 @@ const WorkRepairStackScreen = ({ navigation, route }) => {
                 // navigation.navigate("WorkRepairStackScreen", {
                 //   screen: "ReceiveRepairSearchScreen2",
                 // });
+                // navigation.navigate("WorkRepair", {
+                //   screen: "ReceiveRepairSearchScreen2",
+                // });
                 navigation.navigate("WorkRepair", {
                   screen: "ReceiveRepairSearchScreen2",
+                  params: {
+                    backTab: "WorkRepair",
+                    backScreen: "workrepairscreen",
+                    prevFilter: route.params?.filterResult,
+                  },
                 });
               }}
               style={{ padding: 10 }}
@@ -410,6 +422,17 @@ const SuccessTab = ({ navigation, route }) => {
           name="ReceiveRepair"
           component={ReceiveRepairStackScreen}
           options={Tab1}
+          listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+              // Prevent default action
+              e.preventDefault();
+
+              // Reset to root of ReceiveRepair stack
+              navigation.navigate("ReceiveRepair", {
+                screen: "ReceiveRepairScreen",
+              });
+            },
+          })}
         />
         <Tab.Screen
           name="WorkRepair"
@@ -459,10 +482,11 @@ const MyTab = ({ navigation, route }) => {
     const setHeaderOptions = (options) => {
       navigation.setOptions(options);
     };
-  
+
     // Condition for "WorkTakePhotoScreen" and "camera" routes
-    const isHiddenHeader = routeName === "WorkTakePhotoScreen" || routeName === "camera";
-  
+    const isHiddenHeader =
+      routeName === "WorkTakePhotoScreen" || routeName === "camera";
+
     if (isHiddenHeader) {
       setHeaderOptions({
         headerShown: false,
@@ -500,8 +524,8 @@ const MyTab = ({ navigation, route }) => {
         ),
       });
     }
-  }, [routeName]);
-  
+  }, [routeName, route.params?.rwcode]);
+
   return (
     <StackJobSurvey.Navigator
       initialRouteName="mainTabScreen"

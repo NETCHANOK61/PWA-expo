@@ -15,7 +15,7 @@ import workCarrayRepairReducer from "./jobsurvey/WorkCarrayRepairReducer";
 import saveLocationPointNormalReducer from "./jobsurvey/SaveLocationPointNormalReducer";
 import Counter from "./counter";
 
-export default combineReducers({
+const appReducer = combineReducers({
   counter: Counter,
   loginReducer,
   receiveRepairReducer,
@@ -32,3 +32,12 @@ export default combineReducers({
   workCarrayRepairReducer,
   saveLocationPointNormalReducer,
 });
+
+const rootReducer = (state, action) => {
+  if (action.type === "ACTION_LOGOUT") {
+    state = undefined; // เคลียร์ state ทั้งหมด
+  }
+  return appReducer(state, action);
+};
+
+export default rootReducer;

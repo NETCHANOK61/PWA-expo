@@ -23,7 +23,6 @@ import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 import * as receiveRepairFeedJsonAction from "../../actions/receiverepair/ReceiveRepairFeedJsonAction";
 import * as workRepairAction from "../../actions/workrepair/WorkRepairAction";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { setSearchParams } from "../../actions/repairfilter/RepairFilterAction";
 // import { registerTranslation } from 'react-native-paper-dates';
 // import { th } from 'date-fns/locale'; // Import the Thai locale from date-fns
 
@@ -34,10 +33,6 @@ const { width: viewportWidth, height: viewportHeight } =
 
 export default function ReceiveRepairSearchScreen(props) {
   const dispatch = useDispatch();
-  const searchParams = useSelector(
-    (state) => state.repairFilterReducer.searchParams
-  );
-  // console.log("ReceiveRepairSearchScreen", searchParams);
   // const repairFilterReducer = useSelector(state => state.repairFilterReducer);
   // const [isVisible, setIsVisible] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -54,68 +49,15 @@ export default function ReceiveRepairSearchScreen(props) {
   const [callFunPik, setCallFunPik] = useState({
     date_fun: () => {},
   });
-  const [initialized, setInitialized] = useState(false);
-
-  // const init = async () => {
-  //   await setNotiDate(dateNowThBack(3));
-  //   await setToDate(dateNowTh());
-  // };
 
   const init = async () => {
-    const defaultNotiDate = dateNowThBack(3);
-    const defaultToDate = dateNowTh();
-
-    setNotiDate(defaultNotiDate);
-    setToDate(defaultToDate);
-
-    // Dispatch action เพื่อ set ค่า searchParams ใน Redux store
-    dispatch(
-      setSearchParams({
-        FromDate: defaultNotiDate,
-        ToDate: defaultToDate,
-        IncidentNo: "",
-        CustomerName: "",
-        Telephone: "",
-      })
-    );
+    await setNotiDate(dateNowThBack(3));
+    await setToDate(dateNowTh());
   };
 
-  // init when no searchParams
   useEffect(() => {
-    if (!searchParams && !initialized) {
-      const defaultNotiDate = dateNowThBack(3);
-      const defaultToDate = dateNowTh();
-
-      setNotiDate(defaultNotiDate);
-      setToDate(defaultToDate);
-      setNoNoti("");
-      setName("");
-      setTel("");
-
-      dispatch(
-        setSearchParams({
-          FromDate: defaultNotiDate,
-          ToDate: defaultToDate,
-          IncidentNo: "",
-          CustomerName: "",
-          Telephone: "",
-        })
-      );
-      setInitialized(true);
-    }
-  }, [searchParams, initialized, dispatch]);
-
-  // update local states when searchParams changed
-  useEffect(() => {
-    if (searchParams && !initialized) {
-      setNotiDate(searchParams.FromDate || dateNowThBack(3));
-      setToDate(searchParams.ToDate || dateNowTh());
-      setNoNoti(searchParams.IncidentNo || "");
-      setName(searchParams.CustomerName || "");
-      setTel(searchParams.Telephone || "");
-      setInitialized(true);
-    }
-  }, [searchParams, initialized]);
+    init();
+  }, []);
 
   // const data = () => {
   //   const _ls = repairFilterReducer.dataObject.incidentSearchStatus.map(
@@ -137,11 +79,6 @@ export default function ReceiveRepairSearchScreen(props) {
     if (day.length < 2) day = "0" + day;
 
     return [day, month, year].join("/");
-  };
-
-  const parseDateFromString = (str) => {
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(year - 543, month - 1, day); // ปีพุทธเป็นค.ศ.
   };
 
   const onDismissSingle_noti = React.useCallback(() => {
@@ -170,30 +107,26 @@ export default function ReceiveRepairSearchScreen(props) {
     [(setOpenTo, setDate)]
   );
 
-  const DatePicker_Noti = ({ con, dis, initialDate }) => {
+  const DatePicker_Noti = ({ con, dis }) => {
     return (
       <DateTimePickerModal
         isVisible={openNoti}
         mode="date"
         onConfirm={con}
         onCancel={dis}
-        date={initialDate}
         locale="th_TH"
-        {...(Platform.OS === "ios" ? { textColor: "black" } : {})}
       />
     );
   };
 
-  const DatePicker_to = ({ con, dis, initialDate }) => {
+  const DatePicker_to = ({ con, dis }) => {
     return (
       <DateTimePickerModal
         isVisible={openTo}
         mode="date"
         onConfirm={con}
         onCancel={dis}
-        date={initialDate}
         locale="th_TH"
-        {...(Platform.OS === "ios" ? { textColor: "black" } : {})}
       />
     );
   };
@@ -217,6 +150,19 @@ export default function ReceiveRepairSearchScreen(props) {
     [setToDate]
   );
 
+  // const DatePikerAndroid = () => {
+  //   return (
+  //     <DateTimePicker
+  //       testID="dateTimePicker"
+  //       locale="th-TH"
+  //       value={date}
+  //       mode={"date"}
+  //       is24Hour={true}
+  //       display="default"
+  //       onChange={callFunPik.date_fun}
+  //     />
+  //   );
+  // };
   const DatePikerAndroid = () => {
     return (
       <DateTimePicker
@@ -227,7 +173,6 @@ export default function ReceiveRepairSearchScreen(props) {
         is24Hour={true}
         display="default"
         onChange={callFunPik.date_fun}
-        themeVariant="light"
       />
     );
   };
@@ -267,15 +212,6 @@ export default function ReceiveRepairSearchScreen(props) {
 
   const search = () => {
     setVisibleLoading(true);
-    dispatch(
-      setSearchParams({
-        FromDate: notiDate,
-        ToDate: toDate,
-        IncidentNo: noNoti,
-        CustomerName: name,
-        Telephone: tel,
-      })
-    );
     // const start_test = "20/11/2567"
     // const end_test = "21/11/2567"
     if (props.route.name == "ReceiveRepairSearchScreen") {
@@ -360,7 +296,6 @@ export default function ReceiveRepairSearchScreen(props) {
                       <DatePicker_Noti
                         con={onConfirmSingle_noti}
                         dis={onDismissSingle_noti}
-                        initialDate={parseDateFromString(notiDate)}
                       />
                     )}
                   </View>

@@ -5,10 +5,12 @@ export default StyleSheet.create({
   text: {
     fontSize: 15,
     fontFamily: 'Prompt-Regular',
+    color: "#000",
   },
   text_12: {
     fontSize: 12,
     fontFamily: 'Prompt-Regular',
+    color: "#000",
   },
   text_13_forgetpass: {
     color: '#fff',
@@ -35,28 +37,34 @@ export default StyleSheet.create({
     paddingLeft: 10,
     fontSize: 12,
     fontFamily: 'Prompt-Bold',
+    color: "#000",
   },
   text_bold_12: {
     fontSize: 0.015 * height,
     fontFamily: 'Prompt-Bold',
+    color: "#000",
   },
 
   // NEW
   text_sm_regular: {
     fontSize: 0.015 * height,
     fontFamily: 'Prompt-Regular',
+    color: "#000",
   },
   text_sm_bold: {
     fontSize: 0.015 * height,
     fontFamily: 'Prompt-Bold',
+    color: "#000",
   },
   text_normal_regular: {
     fontSize: 0.02 * height,
     fontFamily: 'Prompt-Regular',
+    color: "#000",
   },
   text_normal_bold: {
     fontSize: 0.02 * height,
     fontFamily: 'Prompt-Bold',
+    color: "#000",
   },
   text_normal_bold_color_indigo: {
     color: '#3a405a',
