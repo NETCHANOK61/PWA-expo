@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Font from "expo-font";
 import store from "./src/app/store/store";
 import AppNavigator from "./src/app/navigations/AppNavigator";
@@ -36,18 +37,20 @@ const App = () => {
   }
 
   return (
-    <Provider store={store}>
-      <NavigationContainer>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="#ffffff"
-          hidden={false}
-        />
-        <View style={{ flex: 1 }}>
-          <AppNavigator />
-        </View>
-      </NavigationContainer>
-    </Provider>
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <NavigationContainer>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor="#ffffff"
+            hidden={false}
+          />
+          <View style={{ flex: 1 }}>
+            <AppNavigator />
+          </View>
+        </NavigationContainer>
+      </Provider>
+    </SafeAreaProvider>
   );
 };
 

@@ -16,10 +16,12 @@ import textsty from "../../styles/TextStyle";
 import workRepairDetailStyle from "../../styles/WorkRepairDetailStyle";
 import Awesome from "../../components/awesomealert/Awesome";
 import { getProfile } from "../../utils/Storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function WorkRepairTebScreen(props) {
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     // setNavigationOption();
@@ -70,13 +72,15 @@ export default function WorkRepairTebScreen(props) {
       }
     }
   };
-  const callPhone = (phone) => {
-    if (Platform.OS === "android") {
-      phoneNumber = `tel:${phone}`;
-    } else {
-      phoneNumber = `telprompt:${phone}`;
+  const callPhone = async (phone) => {
+    const phoneNumber =
+      Platform.OS === "android" ? `tel:${phone}` : `telprompt:${phone}`;
+
+    try {
+      await Linking.openURL(phoneNumber);
+    } catch (err) {
+      console.error("เปิดไม่ได้:", err);
     }
-    Linking.openURL(phoneNumber);
   };
   return (
     <KeyboardAvoidingView
@@ -85,6 +89,7 @@ export default function WorkRepairTebScreen(props) {
     >
       <ScrollView
         style={{ backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         nestedScrollEnabled={true}
       >
         {props.data != null ? (
@@ -388,9 +393,11 @@ export default function WorkRepairTebScreen(props) {
                             { color: "red" },
                           ]}
                         >
-                          {props?.data?.incidents?.[0]?.requestCategorySubject == ""
+                          {props?.data?.incidents?.[0]
+                            ?.requestCategorySubject == ""
                             ? "-"
-                            : props?.data?.incidents?.[0]?.requestCategorySubject}
+                            : props?.data?.incidents?.[0]
+                                ?.requestCategorySubject}
                         </Text>
                       </View>
                     </View>

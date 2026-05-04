@@ -521,7 +521,7 @@ export default function WorkRepairScreen(props) {
           <FlatList
             data={dataArray}
             renderItem={renderRow}
-            keyExtractor={(item, index) => item.rwCode || index.toString()}
+            keyExtractor={(item, index) => `${item.rwCode}-${index}`}
             onRefresh={init}
             refreshing={isLoadding}
             initialNumToRender={20}

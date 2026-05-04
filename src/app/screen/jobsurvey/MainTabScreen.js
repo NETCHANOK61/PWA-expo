@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { View, Dimensions, Text, StyleSheet, SafeAreaView } from "react-native";
+import { View, Dimensions, Text, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import WorkRepairDetailScreen from "./WorkRepairDetailScreen";
 import WorkCarryRepairScreen from "./WorkCarryRepairScreen";
@@ -15,6 +16,8 @@ export default function MainTabScreen({ props, navigation }) {
   const route = useRoute();
   const dispatch = useDispatch();
   const [jobCode, setJobCode] = React.useState("");
+  const insets = useSafeAreaInsets(); // <-- เพิ่ม
+
   const workCarrayRepairReducer = useSelector(
     (state) => state.workCarrayRepairReducer
   );
@@ -300,9 +303,9 @@ export default function MainTabScreen({ props, navigation }) {
         initialLayout={initialLayout}
         style={styles.container}
       />
-      <SafeAreaView>
+      <View style={{ paddingBottom: insets.bottom, backgroundColor: 'white' }}>
         <BottomTab tab={index} switchTab={switchTab} navigation={navigation} />
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

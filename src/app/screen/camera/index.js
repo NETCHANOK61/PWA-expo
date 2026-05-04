@@ -18,7 +18,7 @@ const { width: viewportWidth, height: viewportHeight } =
   Dimensions.get("window");
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as cameraAction from "../../actions/camera/CameraAction";
 

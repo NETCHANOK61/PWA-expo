@@ -4,13 +4,14 @@ import {
   View,
   Text,
   ScrollView,
-  SafeAreaView,
+  // SafeAreaView, // <-- ลบออก
   Dimensions,
   TouchableOpacity,
   TextInput,
   Image,
   Keyboard,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, ButtonGroup, Overlay } from "react-native-elements";
 import { useIsFocused } from "@react-navigation/native";
 import SelectDropdown from "react-native-select-dropdown";
@@ -385,10 +386,10 @@ export default function DetailWorkCallScreen(props) {
   ];
 
   const ListData = () => {
-    return viewData.map((data) => {
+    return viewData.map((data, index) => {
       return (
         <Card
-          key={data.pwaIncidentNo}
+          key={`${data.pwaIncidentNo}-${index}`}
           containerStyle={detailWorkCallStyle.card}
         >
           <View
@@ -856,7 +857,7 @@ export default function DetailWorkCallScreen(props) {
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <ScrollView>{ListData()}</ScrollView>
-      <SafeAreaView>
+      <SafeAreaView edges={['bottom']} style={{ backgroundColor: '#FFFFFF' }}>
         <ButtonGroup
           onPress={(bind) => {
             openOverlay(bind);

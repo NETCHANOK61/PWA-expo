@@ -18,7 +18,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 // import RNFS from 'react-native-fs';
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const { width: viewportWidth, height: viewportHeight } =
@@ -38,10 +38,10 @@ export default function WorkTakePhotoScreen(props) {
   const cameraReducer = useSelector((state) => state.cameraReducer);
   const workSurveyReducer = useSelector((state) => state.workSurveyReducer);
   const workTakePhotoReducer = useSelector(
-    (state) => state.workTakePhotoReducer
+    (state) => state.workTakePhotoReducer,
   );
   const workRepairDetailReducer = useSelector(
-    (state) => state.workRepairDetailReducer
+    (state) => state.workRepairDetailReducer,
   );
 
   const [visibleLoading, setVisibleLoading] = useState(false);
@@ -83,7 +83,7 @@ export default function WorkTakePhotoScreen(props) {
     init(isFocused);
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      backAction,
     );
     return () => {
       dispatch(cameraAction.setPhotoReset());
@@ -236,40 +236,32 @@ export default function WorkTakePhotoScreen(props) {
       comment_3: comment_3,
     });
   };
-  // 7/7/2025
+  // 7/7/2025, 22/4/2026 - ปรับปรุงการเลือกภาพโดยใช้ ImagePicker ของ Expo ซึ่งไม่ต้องขอ permission และรองรับการใช้งานที่หลากหลายมากขึ้น
   const selectPhotoTapped = async (imageSeq) => {
     try {
-      // ✅ ขอสิทธิ์เข้าถึงรูปภาพในอุปกรณ์
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        alert("กรุณาอนุญาตเข้าถึงคลังภาพเพื่อใช้งานฟีเจอร์นี้");
-        return;
-      }
-
-      // ✅ เปิดหน้าจอเลือกรูปจากคลังภาพ
+      // ✅ เปิด Photo Picker ของระบบ (ไม่ต้องใช้ permission)
       const result = await ImagePicker.launchImageLibraryAsync({
-        base64: false, // ❌ ไม่ต้องขอ base64 ตรงนี้
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false,
         quality: 1,
         allowsEditing: false,
+        // ✅ สำคัญ! บอกให้ใช้ system picker
+        legacy: false,
       });
 
-      // ✅ ถ้าไม่ยกเลิกการเลือกรูป
       if (!result.canceled) {
-        const image = result.assets[0]; // รูปที่เลือก
+        const image = result.assets[0];
 
-        // ✅ ย่อรูปเพื่อให้เบาและเร็ว (ลดขนาดภาพ)
         const resized = await ImageManipulator.manipulateAsync(
           image.uri,
-          [{ resize: { width: 720, height: 960 } }], // ปรับขนาดเล็กลง
+          [{ resize: { width: 720, height: 960 } }],
           {
-            compress: 0.8, // บีบอัดไฟล์
+            compress: 0.8,
             format: ImageManipulator.SaveFormat.JPEG,
-          }
+          },
         );
 
-        // ✅ คัดลอกภาพไปเก็บไว้ในพื้นที่ของแอป (iOS จำเป็นต้องทำ)
-        const fileName = resized.uri.split("/").pop(); // เอาชื่อไฟล์ออกจาก path
+        const fileName = resized.uri.split("/").pop();
         const localUri = FileSystem.documentDirectory + fileName;
 
         await FileSystem.copyAsync({
@@ -277,12 +269,10 @@ export default function WorkTakePhotoScreen(props) {
           to: localUri,
         });
 
-        // ✅ อ่านไฟล์ที่ย่อแล้วมาเป็น base64
         const base64Image = await FileSystem.readAsStringAsync(localUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
 
-        // ✅ เซ็ต base64 เข้ารูปตามลำดับที่เลือก
         switch (imageSeq) {
           case 1:
             setImage_1(base64Image);
@@ -364,7 +354,7 @@ export default function WorkTakePhotoScreen(props) {
     _confirmText,
     _cancelText,
     _onConfirmPress,
-    _onCancelPress
+    _onCancelPress,
   ) => {
     setCustomAlert((state) => ({
       ...state,
@@ -399,7 +389,7 @@ export default function WorkTakePhotoScreen(props) {
         },
         () => {
           setVisibleAlert(false);
-        }
+        },
       );
     } else {
       setTimeout(() => {
@@ -424,12 +414,12 @@ export default function WorkTakePhotoScreen(props) {
                   dispatch(
                     workTakePhotoAction.loadDataGetRepairWorkByID(
                       props,
-                      settingAlert
-                    )
+                      settingAlert,
+                    ),
                   );
                 }, 500);
               },
-              () => {}
+              () => {},
             );
             break;
 
@@ -445,7 +435,7 @@ export default function WorkTakePhotoScreen(props) {
               () => {
                 setVisibleAlert(false);
               },
-              () => {}
+              () => {},
             );
             break;
 
@@ -461,7 +451,7 @@ export default function WorkTakePhotoScreen(props) {
               () => {
                 setVisibleAlert(false);
               },
-              () => {}
+              () => {},
             );
             break;
 
@@ -482,7 +472,7 @@ export default function WorkTakePhotoScreen(props) {
                 setTimeout(() => {
                   props.navigation.goBack();
                 }, 800);
-              }
+              },
             );
             break;
           default:
@@ -553,8 +543,8 @@ export default function WorkTakePhotoScreen(props) {
                     imageApi_1 != ""
                       ? props.route.params.image[0].htmlFile
                       : image_1 != ""
-                      ? "data:image/jpeg;base64," + image_1
-                      : ""
+                        ? "data:image/jpeg;base64," + image_1
+                        : "",
                   );
                 }}
               >
@@ -636,8 +626,8 @@ export default function WorkTakePhotoScreen(props) {
                     imageApi_2 != ""
                       ? props.route.params.image[1].htmlFile
                       : image_2 != ""
-                      ? "data:image/jpeg;base64," + image_2
-                      : ""
+                        ? "data:image/jpeg;base64," + image_2
+                        : "",
                   );
                 }}
               >
@@ -720,8 +710,8 @@ export default function WorkTakePhotoScreen(props) {
                     imageApi_3 != ""
                       ? props.route.params.image[2].htmlFile
                       : image_3 != ""
-                      ? "data:image/jpeg;base64," + image_3
-                      : ""
+                        ? "data:image/jpeg;base64," + image_3
+                        : "",
                   );
                 }}
               >
